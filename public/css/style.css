@@ -1,0 +1,261 @@
+
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 260px;
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    z-index: 1000;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #2d3748;
+}
+
+.sidebar-logo img {
+    width: 40px;
+    margin-right: 10px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu-item {
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+.sidebar-menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 10px;
+    color: #4a5568;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.sidebar-menu-link:hover {
+    background-color: #f7fafc;
+}
+
+.sidebar-menu-link.active {
+    background-color: #ebf4ff;
+    color: #4361ee;
+}
+
+.sidebar-menu-icon {
+    margin-right: 12px;
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+/* Main Content Styles */
+.main-content {
+    margin-left: 260px;
+    padding: 30px;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #2d3748;
+}
+
+/* Card Styles */
+.budget-card {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+}
+
+.budget-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.budget-card-add {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    background-color: #f8fafc;
+    cursor: pointer;
+}
+
+.budget-card-add:hover {
+    background-color: #f1f5f9;
+}
+
+.budget-card-add-icon {
+    font-size: 2rem;
+    color: #4361ee;
+    margin-bottom: 10px;
+}
+
+.budget-card-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.budget-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 1.5rem;
+}
+
+.budget-card-info {
+    flex-grow: 1;
+}
+
+.budget-card-category {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.budget-card-count {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.budget-card-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4361ee;
+}
+
+.budget-progress {
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 15px;
+    background-color: #e2e8f0;
+}
+
+.budget-progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    background-color: #4361ee;
+}
+
+.budget-spend-info {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #4361ee;
+    border-color: #4361ee;
+}
+
+.btn-primary:hover {
+    background-color: #3a56d4;
+    border-color: #3a56d4;
+}
+
+/* Form Styles */
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 70px;
+        padding: 20px 10px;
+    }
+    
+    .sidebar-logo span, .sidebar-menu-text {
+        display: none;
+    }
+    
+    .sidebar-menu-icon {
+        margin-right: 0;
+    }
+    
+    .main-content {
+        margin-left: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .budget-card-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .budget-card-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .budget-card-amount {
+        margin-top: 10px;
+    }
+}

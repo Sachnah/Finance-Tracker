@@ -1,0 +1,121 @@
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1>Edit Transaction</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                Update Transaction
+            </div>
+            <div class="card-body">
+                <form action="/transactions/<%= transaction._id %>?_method=PUT" method="POST">
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="income" <%= transaction.type === 'income' ? 'selected' : '' %>>Income</option>
+                            <option value="expense" <%= transaction.type === 'expense' ? 'selected' : '' %>>Expense</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs</span>
+                            <input type="number" class="form-control" id="amount" name="amount" value="<%= transaction.amount %>" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <% if (transaction.type === 'income') { %>
+                                <option value="Salary" <%= transaction.category === 'Salary' ? 'selected' : '' %>>Salary</option>
+                                <option value="Investment" <%= transaction.category === 'Investment' ? 'selected' : '' %>>Investment</option>
+                                <option value="Rental Income" <%= transaction.category === 'Rental Income' ? 'selected' : '' %>>Rental Income</option>
+                                <option value="Bonus" <%= transaction.category === 'Bonus' ? 'selected' : '' %>>Bonus</option>
+                                <option value="Other Income" <%= transaction.category === 'Other Income' ? 'selected' : '' %>>Other Income</option>
+                            <% } else { %>
+                                <option value="Food" <%= transaction.category === 'Food' ? 'selected' : '' %>>Food</option>
+                                <option value="Groceries" <%= transaction.category === 'Groceries' ? 'selected' : '' %>>Groceries</option>
+                                <option value="Fuel" <%= transaction.category === 'Fuel' ? 'selected' : '' %>>Fuel</option>
+                                <option value="Public Transit" <%= transaction.category === 'Public Transit' ? 'selected' : '' %>>Public Transit</option>
+                                <option value="Entertainment" <%= transaction.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                                <option value="Shopping" <%= transaction.category === 'Shopping' ? 'selected' : '' %>>Shopping</option>
+                                <option value="Rent" <%= transaction.category === 'Rent' ? 'selected' : '' %>>Rent</option>
+                                <option value="Travel" <%= transaction.category === 'Travel' ? 'selected' : '' %>>Travel</option>
+                                <option value="Other Expense" <%= transaction.category === 'Other Expense' ? 'selected' : '' %>>Other Expense</option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description (Optional)</label>
+                        <input type="text" class="form-control" id="description" name="description" value="<%= transaction.description || '' %>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" value="<%= new Date(transaction.date).toISOString().split('T')[0] %>" required>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">Update Transaction</button>
+                        <a href="/transactions" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Income and expense categories
+    const incomeCategories = [
+        'Salary',
+        'Investment',
+        'Rental Income',
+        'Bonus',
+        'Other Income'
+    ];
+
+    const expenseCategories = [
+        'Food',
+        'Groceries',
+        'Fuel',
+        'Public Transit',
+        'Entertainment',
+        'Shopping',
+        'Rent',
+        'Travel',
+        'Other Expense'
+    ];
+
+    // Function to update category options based on transaction type
+    function updateCategoryOptions() {
+        const typeSelect = document.getElementById('type');
+        const categorySelect = document.getElementById('category');
+        const selectedCategory = categorySelect.value; // Store current selection if possible
+        
+        // Clear existing options
+        categorySelect.innerHTML = '';
+        
+        // Get selected type
+        const selectedType = typeSelect.value;
+        
+        // Populate categories based on type
+        const categories = selectedType === 'income' ? incomeCategories : expenseCategories;
+        
+        // Add options to select dropdown
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            // If this was the previously selected category, select it again
+            if (category === selectedCategory) {
+                option.selected = true;
+            }
+            categorySelect.appendChild(option);
+        });
+    }
+    
+    // Add event listener to type select
+    document.getElementById('type').addEventListener('change', updateCategoryOptions);
+</script>

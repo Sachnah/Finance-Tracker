@@ -1,0 +1,108 @@
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">Dashboard</h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Total Income</h5>
+                <h3 class="card-text">Rs <%= totalIncome.toFixed(2) %></h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h5 class="card-title">Total Expenses</h5>
+                <h3 class="card-text">Rs <%= totalExpense.toFixed(2) %></h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white <%= balance >= 0 ? 'bg-primary' : 'bg-warning' %>">
+            <div class="card-body">
+                <h5 class="card-title">Current Balance</h5>
+                <h3 class="card-text">Rs <%= balance.toFixed(2) %></h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts section removed as requested -->
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Recent Transactions</span>
+                <a href="/transactions" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <% if (transactions.length > 0) { %>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% transactions.forEach(function(transaction) { %>
+                                <tr>
+                                    <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+                                    <td><%= transaction.category %></td>
+                                    <td><%= transaction.description || '-' %></td>
+                                    <td class="<%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>">
+                                        <%= transaction.type === 'income' ? '+' : '-' %>Rs <%= transaction.amount.toFixed(2) %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p>No transactions found. <a href="/transactions">Add your first transaction</a></p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (Object.keys(budgetUsage).length > 0) { %>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Budget Status</span>
+                <a href="/budgets" class="btn btn-sm btn-primary">Manage Budgets</a>
+            </div>
+            <div class="card-body">
+                <% Object.entries(budgetUsage).forEach(([category, data]) => { %>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <h6><%= category %></h6>
+                            <span>Rs <%= data.spent.toFixed(2) %> / Rs <%= data.budget.toFixed(2) %></span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar <%= data.percentage >= 90 ? 'bg-danger' : 'bg-success' %>" 
+                                role="progressbar" 
+                                style="width: <%= Math.min(100, data.percentage) %>%" 
+                                aria-valuenow="<%= data.percentage %>" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100">
+                                <%= data.percentage.toFixed(0) %>%
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<!-- Chart JavaScript code removed as requested -->

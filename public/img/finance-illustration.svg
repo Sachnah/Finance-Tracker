@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800px" height="600px" viewBox="0 0 800 600" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#F8F9FA" x="0" y="0" width="800" height="600"></rect>
+        <g transform="translate(100, 100)">
+            <!-- Money/Finance Icons -->
+            <circle fill="#3F72AF" cx="300" cy="200" r="180"></circle>
+            <circle fill="#F8F9FA" cx="300" cy="200" r="150"></circle>
+            
+            <!-- Dollar Sign -->
+            <text font-family="Arial" font-size="180" font-weight="bold" fill="#3F72AF" x="240" y="260">$</text>
+            
+            <!-- Chart Bars -->
+            <rect fill="#4BB543" x="50" y="400" width="40" height="60"></rect>
+            <rect fill="#FF6B6B" x="100" y="380" width="40" height="80"></rect>
+            <rect fill="#3F72AF" x="150" y="350" width="40" height="110"></rect>
+            <rect fill="#4BB543" x="200" y="320" width="40" height="140"></rect>
+            <rect fill="#FF6B6B" x="250" y="370" width="40" height="90"></rect>
+            
+            <!-- Coins -->
+            <circle fill="#FFD700" cx="450" cy="420" r="30"></circle>
+            <circle fill="#C0C0C0" cx="500" cy="440" r="25"></circle>
+            <circle fill="#FFD700" cx="540" cy="410" r="20"></circle>
+            
+            <!-- Piggy Bank -->
+            <ellipse fill="#FF6B6B" cx="500" cy="320" rx="70" ry="50"></ellipse>
+            <circle fill="#FF6B6B" cx="550" cy="290" r="20"></circle>
+            <rect fill="#3F72AF" x="510" y="300" width="20" height="5"></rect>
+        </g>
+    </g>
+</svg>
