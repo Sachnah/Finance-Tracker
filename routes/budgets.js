@@ -3,6 +3,7 @@ const router = express.Router();
 const Budget = require('../models/Budget');
 const Transaction = require('../models/Transaction');
 const { protect } = require('../middleware/auth');
+const BudgetRLService = require('../services/budgetRLService');
 
 // Protect all routes
 router.use(protect);
@@ -25,9 +26,23 @@ router.get('/', async (req, res) => {
       user: req.user._id
     });
     
+    // Generate smart budget recommendations using reinforcement learning
+    const smartRecommendations = await BudgetRLService.generateRecommendations(
+      req.user._id,
+      budgets,
+      transactions
+    );
+    
+    // Update the RL model based on past recommendations and outcomes
+    // This runs asynchronously and doesn't block the response
+    BudgetRLService.updateModelBasedOnOutcomes(req.user._id).catch(err => {
+      console.error('Error updating RL model:', err);
+    });
+    
     res.render('budgets', {
       budgets,
       transactions,
+      smartRecommendations,
       user: req.user,
       currentMonth,
       currentYear,

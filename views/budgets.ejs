@@ -209,56 +209,37 @@
 <div class="row mt-4">
     <div class="col-md-12">
         <div class="budget-card">
-            <h5 class="mb-3">Budget Tips</h5>
+            <h5 class="mb-3">Smart Budget Recommendations <i class="fas fa-robot text-muted" title="AI-powered recommendations"></i></h5>
             <ul class="mb-0">
-<% let showGeneralTips = true; %>
-<% budgets.forEach(function(budget) { 
-    const spent = transactions ? transactions
-        .filter(t => t.type === 'expense' && 
-                    t.category === budget.category &&
-                    new Date(t.date).getMonth() + 1 === budget.month &&
-                    new Date(t.date).getFullYear() === budget.year)
-        .reduce((sum, tx) => sum + tx.amount, 0) : 0;
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentYear = today.getFullYear();
-    if (budget.month === currentMonth && budget.year === currentYear && spent > 0) {
-        const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-        const currentDay = today.getDate();
-        const dailyRate = spent / currentDay;
-        const projected = dailyRate * daysInMonth;
-        const percent = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
-        let tipCount = 0;
-        if (percent >= 80 && percent < 100) { %>
-            <li>Warning: You have spent <b><%= percent.toFixed(0) %>%</b> of your <b><%= budget.category %></b> budget. Slow down your spending to avoid running out before month-end.</li>
-            <% tipCount++; showGeneralTips = false; %>
-        <% } else if (percent >= 50 && percent < 80) { %>
-            <li>You have crossed the halfway mark for your <b><%= budget.category %></b> budget. Keep monitoring your expenses to stay on track!</li>
-            <% tipCount++; showGeneralTips = false; %>
-        <% } else if (percent < 50) { %>
-            <li>Good job! You have spent less than half of your <b><%= budget.category %></b> budget so far. Keep it up!</li>
-            <% tipCount++; showGeneralTips = false; %>
-        <% }
-        if (projected > budget.amount) { %>
-            <li>
-                At your current pace, you will exceed your <b><%= budget.category %></b> budget by Rs. <%= (projected - budget.amount).toFixed(0) %> this month. Try reducing non-essential expenses.
-            </li>
-            <% tipCount++; showGeneralTips = false; %>
-        <% }
-        if (tipCount === 0) { %>
-            <li>Keep tracking your <b><%= budget.category %></b> spending for better financial control.</li>
-            <% showGeneralTips = false; %>
-        <% }
-    }
-}); %>
-<% if (showGeneralTips) { %>
+<% if (smartRecommendations && smartRecommendations.length > 0) { %>
+    <% smartRecommendations.forEach(function(tip) { %>
+        <li class="mb-2">
+            <% if (tip.type === 'warning') { %>
+                <span class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i></span>
+            <% } else if (tip.type === 'positive') { %>
+                <span class="text-success"><i class="fas fa-check-circle me-2"></i></span>
+            <% } else if (tip.type === 'information') { %>
+                <span class="text-info"><i class="fas fa-info-circle me-2"></i></span>
+            <% } else if (tip.type === 'suggestion') { %>
+                <span class="text-primary"><i class="fas fa-lightbulb me-2"></i></span>
+            <% } else { %>
+                <span class="text-secondary"><i class="fas fa-comment me-2"></i></span>
+            <% } %>
+            <%= tip.message %>
+            <small class="text-muted d-block mt-1">Confidence: <%= tip.confidence %>%</small>
+        </li>
+    <% }); %>
+<% } else { %>
     <li>Start by tracking your expenses for a month to understand your spending patterns</li>
     <li>Use the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings</li>
     <li>Be realistic about your budget limits</li>
     <li>Review and adjust your budget regularly</li>
     <li>Set specific goals for your savings</li>
 <% } %>
-</ul>
+            </ul>
+            <div class="mt-3 text-muted small">
+                <i class="fas fa-info-circle me-1"></i> These recommendations are powered by reinforcement learning and will improve as you use the app.
+            </div>
         </div>
     </div>
 </div>
