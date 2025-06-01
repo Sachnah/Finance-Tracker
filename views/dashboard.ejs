@@ -1,31 +1,55 @@
-<div class="row">
+<div class="row mb-4 align-items-center">
     <div class="col-md-12">
-        <h1 class="mb-4">Dashboard</h1>
+        <h1 class="mb-0" style="font-size: 2.2rem; font-weight: 700; color: #2d3748;">Dashboard</h1>
     </div>
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-success">
-            <div class="card-body">
-                <h5 class="card-title">Total Income</h5>
-                <h3 class="card-text">Rs <%= totalIncome.toFixed(2) %></h3>
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="budget-card h-100" style="border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; color: white;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 style="font-weight: 600; margin-bottom: 0;">Total Income</h5>
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background-color: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-arrow-down" style="font-size: 18px;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 style="font-weight: 700; font-size: 1.8rem; color: #10b981; margin-bottom: 0;">₹<%= totalIncome.toFixed(2) %></h3>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">All time earnings</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white bg-danger">
-            <div class="card-body">
-                <h5 class="card-title">Total Expenses</h5>
-                <h3 class="card-text">Rs <%= totalExpense.toFixed(2) %></h3>
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="budget-card h-100" style="border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 20px; color: white;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 style="font-weight: 600; margin-bottom: 0;">Total Expenses</h5>
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background-color: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-arrow-up" style="font-size: 18px;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 style="font-weight: 700; font-size: 1.8rem; color: #ef4444; margin-bottom: 0;">₹<%= totalExpense.toFixed(2) %></h3>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">All time spending</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card text-white <%= balance >= 0 ? 'bg-primary' : 'bg-warning' %>">
-            <div class="card-body">
-                <h5 class="card-title">Current Balance</h5>
-                <h3 class="card-text">Rs <%= balance.toFixed(2) %></h3>
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="budget-card h-100" style="border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, <%= balance >= 0 ? '#4361ee, #3a56d4' : '#f59e0b, #d97706' %>); padding: 20px; color: white;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 style="font-weight: 600; margin-bottom: 0;">Current Balance</h5>
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background-color: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas <%= balance >= 0 ? 'fa-wallet' : 'fa-exclamation-triangle' %>" style="font-size: 18px;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 style="font-weight: 700; font-size: 1.8rem; color: <%= balance >= 0 ? '#4361ee' : '#f59e0b' %>; margin-bottom: 0;">₹<%= balance.toFixed(2) %></h3>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">Available funds</p>
             </div>
         </div>
     </div>
@@ -35,37 +59,58 @@
 
 <div class="row mb-4">
     <div class="col-md-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Recent Transactions</span>
-                <a href="/transactions" class="btn btn-sm btn-primary">View All</a>
+        <div class="budget-card" style="border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #4361ee, #3a56d4); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h4 class="mb-0" style="font-weight: 600;"><i class="fas fa-history me-2"></i> Recent Transactions</h4>
+                <a href="/transactions" class="btn btn-sm" style="background-color: rgba(255,255,255,0.2); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 500;">View All <i class="fas fa-chevron-right ms-1" style="font-size: 0.8rem;"></i></a>
             </div>
-            <div class="card-body">
+            <div class="p-0">
                 <% if (transactions.length > 0) { %>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% transactions.forEach(function(transaction) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" style="border-collapse: separate; border-spacing: 0;">
+                            <thead style="background-color: #f8fafc;">
                                 <tr>
-                                    <td><%= new Date(transaction.date).toLocaleDateString() %></td>
-                                    <td><%= transaction.category %></td>
-                                    <td><%= transaction.description || '-' %></td>
-                                    <td class="<%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>">
-                                        <%= transaction.type === 'income' ? '+' : '-' %>Rs <%= transaction.amount.toFixed(2) %>
-                                    </td>
+                                    <th class="px-4 py-3" style="font-weight: 600; color: #4a5568;">Date</th>
+                                    <th class="px-4 py-3" style="font-weight: 600; color: #4a5568;">Category</th>
+                                    <th class="px-4 py-3" style="font-weight: 600; color: #4a5568;">Description</th>
+                                    <th class="px-4 py-3" style="font-weight: 600; color: #4a5568;">Amount</th>
                                 </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <% transactions.forEach(function(transaction) { %>
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div style="width: 36px; height: 36px; border-radius: 10px; background-color: <%= transaction.type === 'income' ? '#e6fffa' : '#fff5f5' %>; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                                    <i class="<%= transaction.type === 'income' ? 'fas fa-arrow-down text-success' : 'fas fa-arrow-up text-danger' %>"></i>
+                                                </div>
+                                                <%= new Date(transaction.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge" style="background-color: #ebf4ff; color: #4361ee; font-weight: 500; padding: 6px 12px; border-radius: 20px;">
+                                                <%= transaction.category %>
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3" style="color: #4a5568;">
+                                            <%= transaction.description || '-' %>
+                                        </td>
+                                        <td class="px-4 py-3 <%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>" style="font-weight: 600; font-size: 1.05rem;">
+                                            <%= transaction.type === 'income' ? '+' : '-' %>₹<%= transaction.amount.toFixed(2) %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
                 <% } else { %>
-                    <p>No transactions found. <a href="/transactions">Add your first transaction</a></p>
+                    <div class="p-5 text-center">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background-color: #f8fafc; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                            <i class="fas fa-receipt" style="font-size: 32px; color: #a0aec0;"></i>
+                        </div>
+                        <h5 style="font-weight: 600; color: #4a5568;">No Transactions Yet</h5>
+                        <p class="text-muted">Add your first transaction using the form on the left.</p>
+                    </div>
                 <% } %>
             </div>
         </div>
@@ -75,27 +120,38 @@
 <% if (Object.keys(budgetUsage).length > 0) { %>
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Budget Status</span>
-                <a href="/budgets" class="btn btn-sm btn-primary">Manage Budgets</a>
+        <div class="budget-card" style="border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #4361ee, #3a56d4); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h4 class="mb-0" style="font-weight: 600;"><i class="fas fa-chart-pie me-2"></i> Budget Status</h4>
+                <a href="/budgets" class="btn btn-sm" style="background-color: rgba(255,255,255,0.2); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 500;">Manage Budgets <i class="fas fa-cog ms-1"></i></a>
             </div>
-            <div class="card-body">
+            <div class="p-4">
                 <% Object.entries(budgetUsage).forEach(([category, data]) => { %>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <h6><%= category %></h6>
-                            <span>Rs <%= data.spent.toFixed(2) %> / Rs <%= data.budget.toFixed(2) %></span>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                <div style="width: 36px; height: 36px; border-radius: 10px; background-color: #ebf4ff; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                    <i class="fas fa-tag" style="color: #4361ee;"></i>
+                                </div>
+                                <h6 style="font-weight: 600; margin-bottom: 0; color: #2d3748;"><%= category %></h6>
+                            </div>
+                            <div>
+                                <span style="font-weight: 600; color: <%= data.percentage >= 90 ? '#ef4444' : '#4a5568' %>;">₹<%= data.spent.toFixed(2) %></span>
+                                <span class="text-muted"> / </span>
+                                <span style="color: #4a5568;">₹<%= data.budget.toFixed(2) %></span>
+                            </div>
                         </div>
-                        <div class="progress">
+                        <div class="progress" style="height: 10px; border-radius: 10px; background-color: #f1f5f9;">
                             <div class="progress-bar <%= data.percentage >= 90 ? 'bg-danger' : 'bg-success' %>" 
                                 role="progressbar" 
-                                style="width: <%= Math.min(100, data.percentage) %>%" 
+                                style="width: <%= Math.min(100, data.percentage) %>%; border-radius: 10px; <%= data.percentage >= 90 ? 'background: linear-gradient(to right, #ef4444, #dc2626);' : 'background: linear-gradient(to right, #10b981, #059669);' %>" 
                                 aria-valuenow="<%= data.percentage %>" 
                                 aria-valuemin="0" 
                                 aria-valuemax="100">
-                                <%= data.percentage.toFixed(0) %>%
                             </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-1">
+                            <small class="<%= data.percentage >= 90 ? 'text-danger' : 'text-success' %>" style="font-weight: 500;"><%= data.percentage.toFixed(0) %>% used</small>
                         </div>
                     </div>
                 <% }); %>

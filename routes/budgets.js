@@ -26,23 +26,41 @@ router.get('/', async (req, res) => {
       user: req.user._id
     });
     
-    // Generate smart budget recommendations using reinforcement learning
-    const smartRecommendations = await BudgetRLService.generateRecommendations(
-      req.user._id,
-      budgets,
-      transactions
-    );
+    // Generate smart recommendations if there are budgets
+    let smartRecommendations = [];
+    let aggregateAdvisory = null;
     
-    // Update the RL model based on past recommendations and outcomes
-    // This runs asynchronously and doesn't block the response
-    BudgetRLService.updateModelBasedOnOutcomes(req.user._id).catch(err => {
-      console.error('Error updating RL model:', err);
-    });
-    
+    if (budgets.length > 0) {
+      // Generate smart budget recommendations using reinforcement learning
+      smartRecommendations = await BudgetRLService.generateRecommendations(
+        req.user._id,
+        budgets,
+        transactions
+      );
+      
+      // Debug: Log recommendations to verify they're being generated
+      console.log('Generated recommendations:', JSON.stringify(smartRecommendations, null, 2));
+      
+      // Generate the aggregate advisory
+      if (smartRecommendations && smartRecommendations.length > 0) {
+        aggregateAdvisory = BudgetRLService.generateAggregateAdvisory(smartRecommendations);
+        console.log('Aggregate advisory:', JSON.stringify(aggregateAdvisory, null, 2));
+      } else {
+        console.log('No recommendations generated or empty recommendations array');
+      }
+      
+      // Update the model based on past recommendations and outcomes
+      // This runs asynchronously and doesn't block the response
+      BudgetRLService.updateModelBasedOnOutcomes(req.user._id).catch(err => {
+        console.error('Error updating recommendation model:', err);
+      });
+    }
+
     res.render('budgets', {
       budgets,
       transactions,
       smartRecommendations,
+      aggregateAdvisory,
       user: req.user,
       currentMonth,
       currentYear,
@@ -79,6 +97,12 @@ router.post('/', async (req, res) => {
       // Update existing budget
       existingBudget.amount = parseFloat(amount);
       await existingBudget.save();
+      
+      // Update recommendations in real-time after budget update
+      BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+        console.error('Error updating recommendations:', err);
+      });
+      
       req.flash('success_msg', 'Budget updated');
     } else {
       // Create new budget
@@ -90,6 +114,12 @@ router.post('/', async (req, res) => {
         year: parseInt(year)
       });
       await newBudget.save();
+      
+      // Update recommendations in real-time after new budget
+      BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+        console.error('Error updating recommendations:', err);
+      });
+      
       req.flash('success_msg', 'Budget added');
     }
     
@@ -101,28 +131,36 @@ router.post('/', async (req, res) => {
   }
 });
 
+
+
 // @route   DELETE /budgets/:id
 // @desc    Delete budget
 router.delete('/:id', async (req, res) => {
   try {
-    const budget = await Budget.findOne({
-      _id: req.params.id,
-      user: req.user._id
-    });
-
-    if (!budget) {
-      req.flash('error_msg', 'Budget not found');
+    const budget = await Budget.findById(req.params.id);
+    
+    // Check if budget exists and belongs to user
+    if (!budget || budget.user.toString() !== req.user._id.toString()) {
+      req.flash('error_msg', 'Budget not found or unauthorized');
       return res.redirect('/budgets');
     }
-
-    await Budget.deleteOne({ _id: budget._id });
-    req.flash('success_msg', 'Budget removed');
+    
+    await Budget.findByIdAndDelete(req.params.id);
+    
+    // Update recommendations in real-time after budget deletion
+    BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+      console.error('Error updating recommendations:', err);
+    });
+    
+    req.flash('success_msg', 'Budget deleted');
     res.redirect('/budgets');
   } catch (err) {
     console.error(err);
-    req.flash('error_msg', 'Error deleting budget');
+    req.flash('error_msg', 'Could not delete budget');
     res.redirect('/budgets');
   }
 });
 
 module.exports = router;
+
+

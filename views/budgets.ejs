@@ -71,7 +71,7 @@
                         bgColor = '#f5f5f5';
                 }
             %>
-            <div class="col-md-4 col-lg-3 mb-4">
+            <div class="col-md-4 col-lg-4 mb-4">
                 <div class="budget-card" style="border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background-color: white; border: none;">
                     <!-- Header with icon and category -->
                     <div class="d-flex align-items-center p-3" style="background-color: <%= bgColor %>; border-radius: 12px 12px 0 0;">
@@ -119,13 +119,180 @@
                         </div>
                     </div>
                     
-                    <!-- Delete button -->
+                    <!-- Budget Insight - Integrated directly in the card -->
+                    <% 
+                    let insightMessage = '';
+                    let insightType = '';
+                    let insightIcon = '';
+                    let insightColor = '';
+                    let insightBgColor = '';
+                    
+                    if (smartRecommendations && smartRecommendations.length > 0) {
+                        // Find recommendation for this budget category (case-insensitive matching)
+                        const budgetRecommendation = smartRecommendations.find(rec => 
+                            rec.category && budget.category && 
+                            rec.category.toLowerCase() === budget.category.toLowerCase());
+                        
+                        // For debugging - log the matching process
+                        console.log(`Looking for recommendation for category: ${budget.category}`);
+                        
+                        if (budgetRecommendation) {
+                            console.log(`Found recommendation for ${budget.category}: ${budgetRecommendation.message}`);
+                            insightMessage = budgetRecommendation.message;
+                            insightType = budgetRecommendation.type;
+                            
+                            // Set icon and colors based on type
+                            if (insightType === 'warning') {
+                                insightIcon = 'fas fa-exclamation-circle';
+                                insightColor = '#dc3545';
+                                insightBgColor = '#fff8f8';
+                            } else if (insightType === 'positive') {
+                                insightIcon = 'fas fa-check-circle';
+                                insightColor = '#198754';
+                                insightBgColor = '#f8fff8';
+                            } else if (insightType === 'caution') {
+                                insightIcon = 'fas fa-exclamation-triangle';
+                                insightColor = '#fd7e14';
+                                insightBgColor = '#fff8f0';
+                            } else if (insightType === 'info') {
+                                insightIcon = 'fas fa-info-circle';
+                                insightColor = '#0dcaf0';
+                                insightBgColor = '#f0f8ff';
+                            } else {
+                                insightIcon = 'fas fa-comment';
+                                insightColor = '#6c757d';
+                                insightBgColor = '#f8f9fa';
+                            }
+                        } else {
+                            // Fallback if no specific recommendation is found
+                            console.log(`No recommendation found for ${budget.category}`);
+                            
+                            // Calculate a simple insight based on remaining budget
+                            const percentRemaining = (remaining / budget.amount) * 100;
+                            
+                            if (percentRemaining <= 0) {
+                                insightMessage = `You've exceeded your ${budget.category} budget. Consider adjusting your spending or increasing your budget for next month.`;
+                                insightType = 'warning';
+                                insightIcon = 'fas fa-exclamation-circle';
+                                insightColor = '#dc3545';
+                                insightBgColor = '#fff8f8';
+                            } else if (percentRemaining < 20) {
+                                insightMessage = `You're close to your ${budget.category} budget limit. Be careful with additional expenses in this category.`;
+                                insightType = 'caution';
+                                insightIcon = 'fas fa-exclamation-triangle';
+                                insightColor = '#fd7e14';
+                                insightBgColor = '#fff8f0';
+                            } else if (percentRemaining > 80) {
+                                insightMessage = `You've barely used your ${budget.category} budget. Great job managing these expenses!`;
+                                insightType = 'positive';
+                                insightIcon = 'fas fa-check-circle';
+                                insightColor = '#198754';
+                                insightBgColor = '#f8fff8';
+                            } else {
+                                insightMessage = `You're on track with your ${budget.category} budget. Keep monitoring your spending.`;
+                                insightType = 'info';
+                                insightIcon = 'fas fa-info-circle';
+                                insightColor = '#0dcaf0';
+                                insightBgColor = '#f0f8ff';
+                            }
+                        }
+                    } else {
+                        // If no recommendations at all, create a simple one based on spending
+                        const percentSpent = (spent / budget.amount) * 100;
+                        
+                        if (percentSpent > 100) {
+                            insightMessage = `You've exceeded your ${budget.category} budget. Consider adjusting your spending or increasing your budget for next month.`;
+                            insightType = 'warning';
+                            insightIcon = 'fas fa-exclamation-circle';
+                            insightColor = '#dc3545';
+                            insightBgColor = '#fff8f8';
+                        } else if (percentSpent > 80) {
+                            insightMessage = `You're close to your ${budget.category} budget limit. Be careful with additional expenses in this category.`;
+                            insightType = 'caution';
+                            insightIcon = 'fas fa-exclamation-triangle';
+                            insightColor = '#fd7e14';
+                            insightBgColor = '#fff8f0';
+                        } else if (percentSpent < 20) {
+                            insightMessage = `You've barely used your ${budget.category} budget. Great job managing these expenses!`;
+                            insightType = 'positive';
+                            insightIcon = 'fas fa-check-circle';
+                            insightColor = '#198754';
+                            insightBgColor = '#f8fff8';
+                        } else {
+                            insightMessage = `You're on track with your ${budget.category} budget. Keep monitoring your spending.`;
+                            insightType = 'info';
+                            insightIcon = 'fas fa-info-circle';
+                            insightColor = '#0dcaf0';
+                            insightBgColor = '#f0f8ff';
+                        }
+                    }
+                    %>
+                    
+                    <!-- Always show an insight message -->
+                    <div class="px-3 pb-3">
+                        <div class="insight-card p-3" style="border-left: 4px solid <%= insightColor %>; background-color: <%= insightBgColor %>; border-radius: 8px; font-size: 14px;">
+                            <i class="<%= insightIcon %> me-2" style="color: <%= insightColor %>;"></i>
+                            <%= insightMessage %>
+                        </div>
+                    </div>
+                    
+                    
+                    <!-- Action buttons -->
                     <div class="text-end p-2">
+                        <!-- Delete button -->
                         <form action="/budgets/<%= budget._id %>?_method=DELETE" method="POST" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;" onclick="return confirm('Are you sure you want to delete this budget?')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
+                    </div>
+                    
+                    <!-- Edit Budget Modal -->
+                    <div class="modal fade" id="editBudgetModal<%= budget._id %>" tabindex="-1" aria-labelledby="editBudgetModalLabel<%= budget._id %>" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editBudgetModalLabel<%= budget._id %>">Edit Budget</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/budgets/<%= budget._id %>" method="POST" id="editBudgetForm<%= budget._id %>">
+                                        <input type="hidden" name="_method" value="PUT">
+                                        <div class="mb-3">
+                                            <label for="editCategory<%= budget._id %>" class="form-label">Category</label>
+                                            <input type="text" class="form-control" id="editCategory<%= budget._id %>" name="category" value="<%= budget.category %>" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="editAmount<%= budget._id %>" class="form-label">Amount (Rs)</label>
+                                            <input type="number" class="form-control" id="editAmount<%= budget._id %>" name="amount" value="<%= budget.amount %>" min="1" step="1" required>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col">
+                                                <label for="editMonth<%= budget._id %>" class="form-label">Month</label>
+                                                <select class="form-select" id="editMonth<%= budget._id %>" name="month" required>
+                                                    <% for(let i = 1; i <= 12; i++) { %>
+                                                        <option value="<%= i %>" <%= budget.month === i ? 'selected' : '' %>><%= months[i-1] %></option>
+                                                    <% } %>
+                                                </select>
+                                            </div>
+                                            <div class="col">
+                                                <label for="editYear<%= budget._id %>" class="form-label">Year</label>
+                                                <select class="form-select" id="editYear<%= budget._id %>" name="year" required>
+                                                    <% const currentYear = new Date().getFullYear(); %>
+                                                    <% for(let i = currentYear - 1; i <= currentYear + 1; i++) { %>
+                                                        <option value="<%= i %>" <%= budget.year === i ? 'selected' : '' %>><%= i %></option>
+                                                    <% } %>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" form="editBudgetForm<%= budget._id %>" class="btn btn-primary">Update Budget</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,42 +371,4 @@
     </div>
 </div>
 
-<!--  ML-->
-  
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="budget-card">
-            <h5 class="mb-3">Smart Budget Recommendations <i class="fas fa-robot text-muted" title="AI-powered recommendations"></i></h5>
-            <ul class="mb-0">
-<% if (smartRecommendations && smartRecommendations.length > 0) { %>
-    <% smartRecommendations.forEach(function(tip) { %>
-        <li class="mb-2">
-            <% if (tip.type === 'warning') { %>
-                <span class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i></span>
-            <% } else if (tip.type === 'positive') { %>
-                <span class="text-success"><i class="fas fa-check-circle me-2"></i></span>
-            <% } else if (tip.type === 'information') { %>
-                <span class="text-info"><i class="fas fa-info-circle me-2"></i></span>
-            <% } else if (tip.type === 'suggestion') { %>
-                <span class="text-primary"><i class="fas fa-lightbulb me-2"></i></span>
-            <% } else { %>
-                <span class="text-secondary"><i class="fas fa-comment me-2"></i></span>
-            <% } %>
-            <%= tip.message %>
-            <small class="text-muted d-block mt-1">Confidence: <%= tip.confidence %>%</small>
-        </li>
-    <% }); %>
-<% } else { %>
-    <li>Start by tracking your expenses for a month to understand your spending patterns</li>
-    <li>Use the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings</li>
-    <li>Be realistic about your budget limits</li>
-    <li>Review and adjust your budget regularly</li>
-    <li>Set specific goals for your savings</li>
-<% } %>
-            </ul>
-            <div class="mt-3 text-muted small">
-                <i class="fas fa-info-circle me-1"></i> These recommendations are powered by reinforcement learning and will improve as you use the app.
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Budget insights are now integrated directly into each budget card -->

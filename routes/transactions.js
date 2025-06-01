@@ -5,6 +5,7 @@ const Budget = require('../models/Budget');
 const { protect } = require('../middleware/auth');
 const { createObjectCsvWriter } = require('csv-writer');
 const path = require('path');
+const BudgetRLService = require('../services/budgetRLService');
 
 // Protect all routes
 router.use(protect);
@@ -18,6 +19,7 @@ router.get('/', async (req, res) => {
     
     res.render('transactions', {
       transactions,
+      BudgetRLService, // Make the service available in the template
       user: req.user,
       path: '/transactions' // For active sidebar highlighting
     });
@@ -50,6 +52,11 @@ router.post('/', async (req, res) => {
     });
 
     await newTransaction.save();
+    
+    // Update recommendations in real-time
+    BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+      console.error('Error updating recommendations:', err);
+    });
 
     // Check budget alert if this is an expense
     if (type === 'expense') {
@@ -140,6 +147,12 @@ router.put('/:id', async (req, res) => {
     transaction.date = date || transaction.date;
 
     await transaction.save();
+    
+    // Update recommendations in real-time after transaction update
+    BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+      console.error('Error updating recommendations:', err);
+    });
+    
     req.flash('success_msg', 'Transaction updated');
     res.redirect('/transactions');
   } catch (err) {
@@ -164,6 +177,12 @@ router.delete('/:id', async (req, res) => {
     }
 
     await Transaction.deleteOne({ _id: transaction._id });
+    
+    // Update recommendations in real-time after transaction deletion
+    BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+      console.error('Error updating recommendations:', err);
+    });
+    
     req.flash('success_msg', 'Transaction removed');
     res.redirect('/transactions');
   } catch (err) {
@@ -185,7 +204,15 @@ router.get('/export', async (req, res) => {
       return res.redirect('/transactions');
     }
 
-    const csvFilePath = path.join(__dirname, '..', 'public', 'exports', `transactions-${Date.now()}.csv`);
+    // Make sure the exports directory exists
+    const fs = require('fs');
+    const exportsDir = path.join(__dirname, '..', 'public', 'exports');
+    
+    if (!fs.existsSync(exportsDir)) {
+      fs.mkdirSync(exportsDir, { recursive: true });
+    }
+
+    const csvFilePath = path.join(exportsDir, `transactions-${Date.now()}.csv`);
     
     const csvWriter = createObjectCsvWriter({
       path: csvFilePath,
@@ -202,24 +229,31 @@ router.get('/export', async (req, res) => {
       date: new Date(tx.date).toLocaleDateString(),
       type: tx.type,
       category: tx.category,
-      amount: tx.amount.toFixed(2),
+      amount: parseFloat(tx.amount).toFixed(2), // Ensure it's a number with 2 decimal places, no currency symbol
       description: tx.description || ''
     }));
 
     await csvWriter.writeRecords(csvData);
     
-    res.download(csvFilePath, 'transactions.csv', (err) => {
-      if (err) {
-        console.error(err);
-        req.flash('error_msg', 'Error downloading CSV');
-        return res.redirect('/transactions');
+    // Set appropriate headers for Excel compatibility
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="transactions.csv"');
+    
+    // Send the file
+    fs.createReadStream(csvFilePath).pipe(res);
+    
+    // Clean up the file after a delay to ensure it's fully sent
+    setTimeout(() => {
+      try {
+        if (fs.existsSync(csvFilePath)) {
+          fs.unlinkSync(csvFilePath);
+        }
+      } catch (cleanupErr) {
+        console.error('Error cleaning up CSV file:', cleanupErr);
       }
-      
-      // Clean up the file after download
-      require('fs').unlinkSync(csvFilePath);
-    });
+    }, 5000); // 5 second delay
   } catch (err) {
-    console.error(err);
+    console.error('Export error:', err);
     req.flash('error_msg', 'Error exporting transactions');
     res.redirect('/transactions');
   }

@@ -21,8 +21,11 @@ const expenseCategories = [
 
 // Function to update category options based on transaction type
 function updateCategoryOptions() {
-    const typeSelect = document.getElementById('type');
+    // Check which radio button is selected
+    const typeIncome = document.getElementById('typeIncome');
     const categorySelect = document.getElementById('category');
+    
+    if (!categorySelect) return;
     
     // Clear existing options
     categorySelect.innerHTML = '';
@@ -33,8 +36,8 @@ function updateCategoryOptions() {
     defaultOption.textContent = 'Select a category';
     categorySelect.appendChild(defaultOption);
     
-    // Get selected type
-    const selectedType = typeSelect.value;
+    // Get selected type based on radio buttons
+    const selectedType = typeIncome && typeIncome.checked ? 'income' : 'expense';
     
     // Populate categories based on type
     const categories = selectedType === 'income' ? incomeCategories : expenseCategories;
