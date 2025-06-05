@@ -5,14 +5,13 @@ const Budget = require('../models/Budget');
 /**
  * Budget Recommendation Service
  * Implements a Budget Pacing Algorithm to provide personalized budget recommendations
- * This replaces the previous Q-learning implementation with a simpler, more intuitive approach
+ * Uses a deterministic approach based on spending patterns and budget usage
  * Includes real-time recommendation updates when transactions or budgets change
  */
 class BudgetRLService {
     
     /**
      * Get or create a model for a user
-     * Kept for backward compatibility
      */
     static async getOrCreateModel(userId) {
         let model = await BudgetRL.findOne({ userId });
@@ -23,9 +22,27 @@ class BudgetRLService {
         return model;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
-     * Calculate budget pacing metrics
-     * Core of the new algorithm
+     * Calculate budget pacing metrics/ core of the algorithm
      */
 
     static calculateBudgetPace(budget, spent, currentDay, daysInMonth) {
@@ -80,9 +97,9 @@ class BudgetRLService {
         
         // Format currency for better readability
         const formatCurrency = (amount) => {
-            return new Intl.NumberFormat('en-IN', {
+            return new Intl.NumberFormat('en-NP', {
                 style: 'currency',
-                currency: 'INR',
+                currency: 'NPR',
                 maximumFractionDigits: 0
             }).format(amount);
         };
@@ -97,7 +114,7 @@ class BudgetRLService {
           
           if (remaining < 0) {
             // Already overspent
-            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget and there are ${daysLeft} days left. You've exceeded your limit — cut back entirely.`;
+            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget and there are ${daysLeft} days left. You've exceeded your limit.`;
           } else {
             // Projected to overspend
             const daysUntilExceeded = Math.ceil(remaining / dailyRate);
@@ -127,12 +144,32 @@ class BudgetRLService {
         return { message, type };
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Generate an aggregate advisory based on all budget states
      * Provides a holistic view of the user's financial situation
+     * NOTE: This function is currently not displayed in the UI
      */
     static generateAggregateAdvisory(recommendations) {
         // If there are no recommendations, provide a simple message to add budgets
+        // NOTE: This aggregate advisory is not currently displayed in the UI
         if (!recommendations || recommendations.length === 0) {
             return { 
                 message: `📌 Budget Advisory\n"Add budgets for your main expense categories to get personalized financial advice."`, 
@@ -184,6 +221,8 @@ class BudgetRLService {
             type = "positive";
         }
         
+
+        
         // Start with the title
         message = `📌 Budget Advisory\n`;
         
@@ -195,6 +234,10 @@ class BudgetRLService {
             return '₹' + Math.abs(Math.round(amount)).toLocaleString();
         };
         
+
+
+
+
         // ALWAYS prioritize overspending and near limit categories first, but with encouraging tone
         if (overBudget.length > 0) {
             // Get total overspent amount
@@ -292,15 +335,45 @@ class BudgetRLService {
         
         return { message, type };
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
     /**
      * Generate personalized recommendations for a user
      * This method maintains the same signature as before for compatibility
+     * Note: we keep the budget pacing algorithm
      */
     static async generateRecommendations(userId, budgets, transactions) {
-        // Keep using the model for storing recommendation history
+        // Keep using the model for storing recommendation history (RL functionality commented out)
         const model = await this.getOrCreateModel(userId);
         
         // Clear previous recommendations before generating new ones
+        // This was part of the RL approach but we keep it for history tracking
         model.recommendationHistory = model.recommendationHistory.filter(rec => {
             const recDate = new Date(rec.date);
             const now = new Date();
@@ -371,6 +444,7 @@ class BudgetRLService {
                 type: recommendation.type,
                 date: new Date(),
                 pacePercentage: paceData.pacePercentage
+                // RL-specific properties have been removed
             });
         }
         
@@ -430,11 +504,103 @@ class BudgetRLService {
         return recommendations;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     /**
      * Update the model based on whether recommendations were followed
-     * Simplified version that maintains compatibility with existing code
+     * This method is commented out as it was part of the RL implementation
+     * Keeping the method signature for backward compatibility
      */
     static async updateModelBasedOnOutcomes(userId) {
+        // This method was used to update the RL model based on whether recommendations were followed
+        // Since we're not using RL anymore, we're commenting out the implementation
+        // but keeping the method for backward compatibility
+        
+        /*
         const model = await this.getOrCreateModel(userId);
         const today = new Date();
         
@@ -482,30 +648,34 @@ class BudgetRLService {
         }
         
         await model.save();
+        */
         return true;
     }
     
-    // These methods are kept for backward compatibility but are no longer used
+    // These methods were part of the RL implementation and are now commented out
+    // They are kept as empty methods for backward compatibility
     
     static getStateRepresentation(budget, spent, daysInMonth, currentDay) {
-        // This method is kept for backward compatibility
-        // It's no longer used in the new algorithm
+        // This method was part of the RL implementation
+        // It's commented out as we're not using RL anymore
         return `${budget.category}_pace`;
     }
     
     static getActions(state) {
-        // This method is kept for backward compatibility
+        // This method was part of the RL implementation
+        // It's commented out as we're not using RL anymore
         return ['pace_recommendation'];
     }
     
     static chooseAction(state, qValues, explorationRate) {
-        // This method is kept for backward compatibility
+        // This method was part of the RL implementation
+        // It's commented out as we're not using RL anymore
         return 'pace_recommendation';
     }
     
     static actionToRecommendation(action, state, budget, spent, projectedSpending) {
-        // This method is kept for backward compatibility
-        // The actual recommendation is now generated by getPaceRecommendation
+        // This method was part of the RL implementation
+        // It's commented out as we're not using RL anymore
         return {
             message: `Keep tracking your spending for better financial control.`,
             confidence: 60,
@@ -514,49 +684,21 @@ class BudgetRLService {
     }
     
     static calculateReward(budget, spent, previousSpent) {
-        // This method is kept for backward compatibility
+        // This method was part of the RL implementation
+        // It's commented out as we're not using RL anymore
         return spent <= budget.amount ? 1 : -1;
     }
     
     static async updateModel(userId, state, action, reward, nextState) {
-        // This method is kept for backward compatibility
-        // No actual Q-learning updates are performed
+        // This method was part of the RL implementation
+        // It's commented out as we're not using RL anymore
         return true;
     }
     
     /**
      * Real-time recommendation update when transactions or budgets change
      * This method should be called whenever a transaction or budget is added, updated, or deleted
-     */
-    static async updateRecommendationsRealTime(userId) {
-        try {
-            // Get current month's budgets
-            const today = new Date();
-            const currentMonth = today.getMonth() + 1;
-            const currentYear = today.getFullYear();
-            
-            const budgets = await Budget.find({
-                user: userId,
-                month: currentMonth,
-                year: currentYear
-            });
-            
-            // Get all transactions for this user
-            const transactions = await Transaction.find({ user: userId });
-            
-            // Generate fresh recommendations
-            await this.generateRecommendations(userId, budgets, transactions);
-            
-            return true;
-        } catch (error) {
-            console.error('Error updating real-time recommendations:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Real-time recommendation update when transactions or budgets change
-     * This method should be called whenever a transaction or budget is added, updated, or deleted
+     * Note: This uses the budget pacing algorithm, not RL
      */
     static async updateRecommendationsRealTime(userId) {
         try {

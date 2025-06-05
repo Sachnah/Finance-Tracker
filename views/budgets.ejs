@@ -90,7 +90,7 @@
                     <!-- Amount -->
                     <div class="p-3 text-end">
                         <div style="font-size: 24px; font-weight: 700; color: #4361ee;">
-                            <span style="font-size: 16px; position: relative; top: -5px;">Rs</span> <%= budget.amount.toFixed(0) %>
+                            <span style="font-size: 16px; position: relative; top: -5px;">Rs</span> <%= formatNepaliCurrency(budget.amount) %>
                         </div>
                     </div>
                     
@@ -111,14 +111,17 @@
                     <div class="d-flex justify-content-between p-3">
                         <div>
                             <div style="font-size: 12px; color: #666;">Spent</div>
-                            <div style="font-weight: 600;">Rs <%= spent.toFixed(0) %></div>
+                            <div style="font-weight: 600;">Rs <%= formatNepaliCurrency(spent) %></div>
                         </div>
                         <div class="text-end">
                             <div style="font-size: 12px; color: #666;">Remaining</div>
-                            <div style="font-weight: 600;">Rs <%= remaining.toFixed(0) %></div>
+                            <div style="font-weight: 600;">Rs <%= formatNepaliCurrency(Math.max(0, remaining)) %></div>
                         </div>
                     </div>
                     
+
+
+
                     <!-- Budget Insight - Integrated directly in the card -->
                     <% 
                     let insightMessage = '';
@@ -248,7 +251,7 @@
                     </div>
                     
                     <!-- Edit Budget Modal -->
-                    <div class="modal fade" id="editBudgetModal<%= budget._id %>" tabindex="-1" aria-labelledby="editBudgetModalLabel<%= budget._id %>" aria-hidden="true">
+                    <!-- <div class="modal fade" id="editBudgetModal<%= budget._id %>" tabindex="-1" aria-labelledby="editBudgetModalLabel<%= budget._id %>" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -293,7 +296,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         <% }); %>
@@ -371,4 +374,4 @@
     </div>
 </div>
 
-<!-- Budget insights are now integrated directly into each budget card -->
+<!-- Budget insights are integrated directly into each budget card -->

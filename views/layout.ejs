@@ -18,7 +18,7 @@
     <div class="sidebar">
         <div class="sidebar-logo">
             <i class="fas fa-wallet text-primary"></i>
-            <span> BSU Tracker</span>
+            <span>  BSU Tracker</span>
         </div>
         
         <ul class="sidebar-menu">
@@ -28,18 +28,21 @@
                     <span class="sidebar-menu-text">Dashboard</span>
                 </a>
             </li>
-            <li class="sidebar-menu-item">
-                <a href="/transactions" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/transactions' ? 'active' : '' %>">
-                    <i class="fas fa-exchange-alt sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Transactions</span>
-                </a>
-            </li>
+
             <li class="sidebar-menu-item">
                 <a href="/budgets" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/budgets' ? 'active' : '' %>">
                     <i class="fas fa-chart-pie sidebar-menu-icon"></i>
                     <span class="sidebar-menu-text">Budgets</span>
                 </a>
             </li>
+
+            <li class="sidebar-menu-item">
+                <a href="/transactions" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/transactions' ? 'active' : '' %>">
+                    <i class="fas fa-exchange-alt sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Transactions</span>
+                </a>
+            </li>
+            
             <li class="sidebar-menu-item">
                 <a href="/users/profile" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/users/profile' ? 'active' : '' %>">
                     <i class="fas fa-user sidebar-menu-icon"></i>
@@ -86,5 +89,41 @@
     <script src="/js/transaction-categories.js"></script>
     <script src="/js/transaction-ui.js"></script>
     <% } %>
+
+    <script>
+    function formatNepaliCurrency(num) {
+      if (typeof num !== 'number') {
+        return String(num); // Return as string if not a number or if already formatted
+      }
+
+      let numStr = String(num);
+      // If the number has a fractional part, format it to 2 decimal places.
+      // Otherwise, use it as is (to avoid adding .00 to integers).
+      if (num % 1 !== 0) {
+        numStr = num.toFixed(2);
+      } else {
+        // Ensure it's a string for the split operation, even if it's an integer
+        numStr = String(num);
+      }
+
+      const [integerPart, decimalPart] = numStr.split('.');
+
+      const lastThree = integerPart.slice(-3);
+      const otherNumbers = integerPart.slice(0, -3);
+      let formattedInteger = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+      if (otherNumbers) {
+        formattedInteger += ',';
+      }
+      formattedInteger += lastThree;
+
+      // Only add decimal part if it exists and is not "00"
+      // Also handle cases where decimalPart might be undefined (for integers)
+      if (decimalPart && decimalPart !== "00") {
+        return `₹${formattedInteger}.${decimalPart}`;
+      } else {
+        return `₹${formattedInteger}`;
+      }
+    }
+    </script>
 </body>
 </html>

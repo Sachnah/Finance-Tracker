@@ -4,19 +4,19 @@ const Transaction = require('../models/Transaction');
 const Budget = require('../models/Budget');
 const { protect } = require('../middleware/auth');
 
-// @route   GET /
-// @desc    Landing Page
+// GET /
+// Landing Page
 router.get('/', (req, res) => {
   if (req.session.userId) {
     return res.redirect('/dashboard');
   }
   res.render('index', {
-    path: '/' // For active sidebar highlighting
+    path: '/' // For active sidebar 
   });
 });
 
-// @route   GET /dashboard
-// @desc    Dashboard
+// GET /dashboard
+// Dashboard
 router.get('/dashboard', protect, async (req, res) => {
   try {
     // Get all transactions for this user
@@ -31,7 +31,7 @@ router.get('/dashboard', protect, async (req, res) => {
       .filter(t => t.type === 'expense')
       .reduce((sum, tx) => sum + tx.amount, 0);
     
-    const balance = totalIncome - totalExpense;
+    const balance = Math.max(0, totalIncome - totalExpense);
     
     // Get current month's budgets
     const currentDate = new Date();

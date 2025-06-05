@@ -1,0 +1,349 @@
+# FINANCE TRACKER PROJECT - WEEKLY MEETING LOGS
+
+## Team Members
+1. [Team Member 1 Bibek]
+2. [Team Member 2 Sachana]
+3. [Team Member 3 Usmita]
+
+## Project Supervisor
+[Supervisor Name]
+
+---
+
+## Week 1 (August 15, 2024)
+
+### Items for Discussion:
+1. Initial project idea brainstorming
+2. Discussion of potential technologies to use
+3. Assignment of preliminary research tasks
+4. Timeline planning for the semester
+
+### Action List:
+1. Each member to research existing personal finance applications and create a list of features
+2. Investigate MongoDB, Express, and Node.js stack for backend development
+3. Create initial project proposal document with problem statement and objectives
+4. Set up GitHub repository for version control
+
+### Supervisor Feedback:
+- Suggested narrowing down the scope to ensure completion within the semester
+- Recommended focusing on core financial tracking features before adding advanced analytics
+- Advised on proposal format and requirements
+
+---
+
+## Week 2 (August 22, 2024)
+
+### Items for Discussion:
+1. Review of research findings on existing finance applications
+2. Technology stack decision and justification
+3. Feature prioritization for MVP (Minimum Viable Product)
+4. Division of responsibilities among team members
+
+### Action List:
+1. Finalize project proposal with feature list, technology stack, and timeline
+2. Create database schema design for users, transactions, and budgets
+3. Set up development environment on each team member's computer
+4. Begin learning/refreshing knowledge on MongoDB and Express.js
+
+### Supervisor Feedback:
+- Approved technology stack choice
+- Suggested adding a section on security considerations in the proposal
+- Recommended creating user stories to better understand requirements
+
+---
+
+## Week 3 (August 29, 2024)
+
+### Items for Discussion:
+1. Presentation of completed project proposal
+2. Database schema design review
+3. UI/UX mockups initial ideas
+4. Development approach (agile methodology)
+
+### Action List:
+1. Prepare for proposal presentation scheduled for next week
+2. Create detailed mockups for key application screens
+3. Implement basic Express.js server setup and MongoDB connection
+4. Define API endpoints for user authentication
+
+### Supervisor Feedback:
+- Provided feedback on proposal presentation slides
+- Suggested improvements to database schema for better scalability
+- Recommended implementing authentication early in the development process
+
+---
+
+## Week 4 (September 5, 2024)
+
+### Items for Discussion:
+1. Proposal presentation debrief
+2. Progress on server setup and database connection
+3. Authentication implementation approach
+4. UI design progress
+
+### Action List:
+1. Implement user registration and login functionality
+2. Create basic EJS templates for the application layout
+3. Set up routes for main application pages
+4. Begin implementing transaction model and CRUD operations
+
+### Supervisor Feedback:
+- Proposal was well-received; minor adjustments needed
+- Advised on best practices for password hashing and session management
+- Suggested implementing form validation on both client and server sides
+
+---
+
+## Week 5 (September 12, 2024)
+
+### Items for Discussion:
+1. Authentication system progress
+2. Transaction management implementation status
+3. Frontend template structure
+4. Testing strategy
+
+### Action List:
+1. Complete transaction CRUD operations
+2. Implement dashboard with basic financial summary
+3. Create transaction listing page with filtering options
+4. Begin unit testing for backend routes
+
+### Supervisor Feedback:
+- Reviewed authentication code and suggested security improvements
+- Recommended adding pagination for transaction listings
+- Discussed the importance of input validation and error handling
+
+---
+
+## Week 6 (September 19, 2024)
+
+### Items for Discussion:
+1. Transaction management feature demo
+2. Dashboard implementation progress
+3. Budget feature planning
+4. Data visualization options
+
+### Action List:
+1. Implement budget creation and management functionality
+2. Research and integrate Chart.js for data visualization
+3. Enhance dashboard with spending breakdowns
+4. Add CSV export functionality for transactions
+
+### Supervisor Feedback:
+- Impressed with transaction management implementation
+- Suggested adding categories for better organization of transactions
+- Recommended researching best practices for financial data visualization
+
+---
+
+## Week 7 (September 26, 2024)
+
+### Items for Discussion:
+1. Budget management implementation progress
+2. Data visualization initial implementation
+3. CSV export functionality
+4. Midterm presentation preparation
+
+### Action List:
+1. Complete budget tracking features with visual indicators
+2. Implement spending by category charts
+3. Add income vs. expense visualization
+4. Begin preparing for midterm presentation
+
+### Supervisor Feedback:
+- Provided feedback on budget implementation
+- Suggested adding budget vs. actual spending comparisons
+- Discussed expectations for midterm presentation
+
+---
+
+## Week 8 (October 3, 2024)
+
+### Items for Discussion:
+1. Complete feature review before midterm
+2. Data visualization refinements
+3. User experience improvements
+4. Known issues and bugs
+
+### Action List:
+1. Fix identified bugs in transaction and budget management
+2. Enhance UI with improved styling and responsiveness
+3. Implement remaining dashboard visualizations
+4. Finalize midterm presentation and demo
+
+### Supervisor Feedback:
+- Conducted thorough review of all implemented features
+- Suggested UI improvements for better user experience
+- Advised on content to emphasize during midterm presentation
+
+---
+
+## Week 9 (October 10, 2024)
+
+### Items for Discussion:
+1. Midterm presentation preparation
+2. Progress report compilation
+3. Demo rehearsal
+4. Second-half semester planning
+
+### Action List:
+1. Complete midterm progress report document
+2. Prepare live demonstration of key features
+3. Practice presentation and anticipate questions
+4. Plan feature implementation for remaining weeks
+
+### Supervisor Feedback:
+- Reviewed progress report and suggested improvements
+- Provided tips for effective presentation delivery
+- Helped prioritize features for the second half of the semester
+
+---
+
+## Week 10 (October 17, 2024)
+
+### Items for Discussion:
+1. Midterm presentation debrief
+2. Feedback incorporation plan
+3. Budget recommendation algorithm concept
+4. UI/UX improvement ideas
+
+### Action List:
+1. Address feedback received during midterm presentation
+2. Begin implementing budget pacing algorithm
+3. Enhance UI with modern styling and animations
+4. Implement responsive design improvements for mobile users
+
+### Supervisor Feedback:
+- Shared positive feedback from midterm evaluation committee
+- Encouraged the team to pursue the budget recommendation feature
+- Suggested focusing on making the application more user-friendly
+
+---
+
+## Week 11 (October 24, 2024)
+
+### Items for Discussion:
+1. Budget recommendation algorithm design
+2. UI modernization progress
+3. Responsive design implementation
+4. Testing strategy for new features
+
+### Action List:
+1. Implement core budget pacing calculation logic
+2. Create recommendation generation based on spending patterns
+3. Redesign budget cards with improved visual indicators
+4. Add unit tests for recommendation algorithm
+
+### Supervisor Feedback:
+- Provided insights on algorithm design and edge cases to consider
+- Suggested user testing to validate UI improvements
+- Recommended comprehensive testing of the recommendation system
+
+---
+
+## Week 12 (October 31, 2024)
+
+### Items for Discussion:
+1. Budget recommendation system implementation progress
+2. UI redesign completion
+3. Testing results and bug fixes
+4. Final report planning
+
+### Action List:
+1. Refine recommendation algorithm based on test results
+2. Implement category-specific advice generation
+3. Complete UI modernization across all pages
+4. Begin drafting final project report
+
+### Supervisor Feedback:
+- Reviewed recommendation algorithm implementation
+- Suggested improvements for edge cases and special scenarios
+- Provided guidance on final report structure and content
+
+---
+
+## Week 13 (November 7, 2024)
+
+### Items for Discussion:
+1. Complete system integration testing
+2. Final feature additions and refinements
+3. Performance optimization opportunities
+4. Final report progress
+
+### Action List:
+1. Implement aggregate financial advisory feature
+2. Optimize database queries for better performance
+3. Add final polish to UI elements and interactions
+4. Continue working on final project report
+
+### Supervisor Feedback:
+- Conducted thorough review of the entire application
+- Suggested minor improvements to enhance user experience
+- Provided feedback on report draft sections
+
+---
+
+## Week 14 (November 14, 2024)
+
+### Items for Discussion:
+1. Final application review
+2. Report completion status
+3. Final presentation planning
+4. Project demonstration preparation
+
+### Action List:
+1. Complete final project report
+2. Prepare comprehensive demonstration script
+3. Create presentation slides for final defense
+4. Conduct final testing and bug fixing
+
+### Supervisor Feedback:
+- Reviewed final report and suggested minor revisions
+- Provided guidance on presentation structure and content
+- Discussed strategies for effective demonstration
+
+---
+
+## Week 15 (November 21, 2024)
+
+### Items for Discussion:
+1. Final presentation rehearsal
+2. Report submission preparation
+3. Live demonstration practice
+4. Question and answer preparation
+
+### Action List:
+1. Submit final project report to department
+2. Finalize presentation slides and speaking notes
+3. Practice live demonstration to ensure smooth execution
+4. Prepare for potential technical questions from evaluation committee
+
+### Supervisor Feedback:
+- Conducted mock presentation and provided feedback
+- Suggested improvements to demonstration flow
+- Helped anticipate potential questions from external examiner
+
+---
+
+## Week 16 (November 28, 2024)
+
+### Items for Discussion:
+1. Final defense preparation
+2. Individual contribution review
+3. Technical documentation completeness
+4. Post-presentation plans
+
+### Action List:
+1. Make final adjustments to presentation based on feedback
+2. Ensure all team members are prepared to discuss their contributions
+3. Verify all documentation is complete and accurate
+4. Prepare deployment package for submission
+
+### Supervisor Feedback:
+- Expressed confidence in the team's readiness for final defense
+- Provided last-minute advice for presentation delivery
+- Congratulated the team on their hard work throughout the semester
+
+---
+
+*Note: This document serves as a record of weekly meetings with our project supervisor and demonstrates our team's progress throughout the semester.*

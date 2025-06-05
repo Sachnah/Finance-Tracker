@@ -45,11 +45,43 @@ app.use(session({
 // Connect flash for flash messages
 app.use(flash());
 
-// Global variables for flash messages
+// Helper function for Nepali currency formatting
+function formatNepaliCurrency(num) {
+  if (typeof num !== 'number') {
+    return String(num); // Return as string if not a number
+  }
+
+  let numStr = String(num);
+  // If the number has a fractional part, format it to 2 decimal places.
+  // Otherwise, use it as is (to avoid adding .00 to integers).
+  if (num % 1 !== 0) {
+    numStr = num.toFixed(2);
+  }
+
+  const [integerPart, decimalPart] = numStr.split('.');
+
+  const lastThree = integerPart.slice(-3);
+  const otherNumbers = integerPart.slice(0, -3);
+  let formattedInteger = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+  if (otherNumbers) {
+    formattedInteger += ',';
+  }
+  formattedInteger += lastThree;
+
+  // Only add decimal part if it exists and is not "00"
+  if (decimalPart && decimalPart !== "00") {
+    return `${formattedInteger}.${decimalPart}`;
+  } else {
+    return formattedInteger;
+  }
+}
+
+// Global variables for flash messages and helper functions
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash('success_msg');
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
+  res.locals.formatNepaliCurrency = formatNepaliCurrency;
   next();
 });
 

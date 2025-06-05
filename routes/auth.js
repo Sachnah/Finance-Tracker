@@ -3,16 +3,16 @@ const router = express.Router();
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
 
-// @route   GET /users/register
-// @desc    Render registration form
+// GET /users/register
+// Render registration form
 router.get('/register', (req, res) => {
   res.render('register', {
     path: '/users/register'
   });
 });
 
-// @route   POST /users/register
-// @desc    Register user
+// POST /users/register
+// Register user
 router.post('/register', async (req, res) => {
   const { name, email, password, password2 } = req.body;
   let errors = [];
@@ -70,16 +70,16 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// @route   GET /users/login
-// @desc    Render login form
+// GET /users/login
+// Render login form
 router.get('/login', (req, res) => {
   res.render('login', {
     path: '/users/login'
   });
 });
 
-// @route   POST /users/login
-// @desc    Login user
+// POST /users/login
+// Login user
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -111,8 +111,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// @route   GET /users/logout
-// @desc    Logout user
+// GET /users/logout
+// Logout user
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -122,8 +122,8 @@ router.get('/logout', (req, res) => {
   });
 });
 
-// @route   GET /users/profile
-// @desc    User profile
+// GET /users/profile
+// User profile
 router.get('/profile', protect, (req, res) => {
   res.render('profile', {
     user: req.user,

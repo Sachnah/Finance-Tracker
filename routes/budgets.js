@@ -8,8 +8,8 @@ const BudgetRLService = require('../services/budgetRLService');
 // Protect all routes
 router.use(protect);
 
-// @route   GET /budgets
-// @desc    Get all budgets
+// GET /budgets
+// Get all budgets
 router.get('/', async (req, res) => {
   try {
     const currentDate = new Date();
@@ -73,8 +73,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   POST /budgets
-// @desc    Add new budget
+// POST /budgets
+// Add new budget
 router.post('/', async (req, res) => {
   try {
     const { category, amount, month, year } = req.body;
@@ -133,8 +133,8 @@ router.post('/', async (req, res) => {
 
 
 
-// @route   DELETE /budgets/:id
-// @desc    Delete budget
+// DELETE /budgets/:id
+// Delete budget
 router.delete('/:id', async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);

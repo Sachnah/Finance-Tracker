@@ -71,6 +71,11 @@ body {
     text-align: center;
 }
 
+.sidebar-menu-text {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
 /* Main Content Styles */
 .main-content {
     margin-left: 260px;

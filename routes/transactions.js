@@ -10,8 +10,8 @@ const BudgetRLService = require('../services/budgetRLService');
 // Protect all routes
 router.use(protect);
 
-// @route   GET /transactions
-// @desc    Get all transactions
+// GET /transactions
+// Get all transactions
 router.get('/', async (req, res) => {
   try {
     const transactions = await Transaction.find({ user: req.user._id })
@@ -30,8 +30,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   POST /transactions
-// @desc    Add new transaction
+// POST /transactions
+// Add new transaction
 router.post('/', async (req, res) => {
   try {
     const { amount, type, category, description, date } = req.body;
@@ -99,8 +99,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// @route   GET /transactions/:id/edit
-// @desc    Show edit transaction form
+// GET /transactions/:id/edit
+// Show edit transaction form
 router.get('/:id/edit', async (req, res) => {
   try {
     const transaction = await Transaction.findOne({
@@ -124,8 +124,8 @@ router.get('/:id/edit', async (req, res) => {
   }
 });
 
-// @route   PUT /transactions/:id
-// @desc    Update transaction
+// PUT /transactions/:id
+// Update transaction
 router.put('/:id', async (req, res) => {
   try {
     const { amount, type, category, description, date } = req.body;
@@ -162,8 +162,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// @route   DELETE /transactions/:id
-// @desc    Delete transaction
+// DELETE /transactions/:id
+// Delete transaction
 router.delete('/:id', async (req, res) => {
   try {
     const transaction = await Transaction.findOne({
@@ -192,8 +192,8 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// @route   GET /transactions/export
-// @desc    Export transactions as CSV
+// GET /transactions/export
+// Export transactions as CSV
 router.get('/export', async (req, res) => {
   try {
     const transactions = await Transaction.find({ user: req.user._id })
