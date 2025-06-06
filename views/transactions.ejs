@@ -13,7 +13,7 @@
     <div class="col-lg-7">
         <div class="budget-card" style="border-radius: 16px; overflow: hidden;">
             <div style="background: linear-gradient(135deg, #4361ee, #3a56d4); padding: 20px; color: white;">
-                <h4 class="mb-0" style="font-weight: 600;"><i class="fas fa-plus-circle me-2"></i> Add New Transaction</h4>
+                <h4 class="mb-0" style="font-weight: 600;"><i class="fas fa-plus-circle me-2"></i> Log Your Transaction</h4>
             </div>
             <div class="p-4">
                 <form action="/transactions" method="POST" id="transactionForm">
@@ -22,17 +22,19 @@
                         <label class="form-label fw-medium mb-2">Transaction Type</label>
                         <div class="d-flex" style="background-color: #f1f5f9; border-radius: 10px; padding: 4px;">
                             <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
-                                <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" checked style="display: none;" onchange="updateCategoryOptions()">
-                                <label class="form-check-label type-label" for="typeIncome" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
-                                    <i class="fas fa-arrow-down text-success me-2"></i> Balance
-                                </label>
-                            </div>
-                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
-                                <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense" style="display: none;" onchange="updateCategoryOptions()">
+                                <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense" checked style="display: none;" onchange="updateCategoryOptions()">
                                 <label class="form-check-label type-label" for="typeExpense" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
                                     <i class="fas fa-arrow-up text-danger me-2"></i> Expense
                                 </label>
                             </div>
+                            
+                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
+                                <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" style="display: none;" onchange="updateCategoryOptions()">
+                                <label class="form-check-label type-label" for="typeIncome" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
+                                    <i class="fas fa-arrow-down text-success me-2"></i> Balance
+                                </label>
+                            </div>
+                            
                         </div>
                     </div>
                     

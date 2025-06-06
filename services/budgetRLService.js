@@ -99,7 +99,7 @@ class BudgetRLService {
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('en-NP', {
                 style: 'currency',
-                currency: 'NPR',
+                currency: 'NRs',
                 maximumFractionDigits: 0
             }).format(amount);
         };

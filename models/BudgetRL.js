@@ -40,6 +40,7 @@ const BudgetRLSchema = new mongoose.Schema({
         type: Number,
         default: 0.2
     },
+    // Track the last time the model was updated
     lastUpdated: {
         type: Date,
         default: Date.now
