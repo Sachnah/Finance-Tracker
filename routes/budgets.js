@@ -43,7 +43,8 @@ router.get('/', async (req, res) => {
       
       // Generate the aggregate advisory
       if (smartRecommendations && smartRecommendations.length > 0) {
-        aggregateAdvisory = BudgetRLService.generateAggregateAdvisory(smartRecommendations);
+        // The aggregateAdvisory feature was removed as it was not implemented in the UI.
+        // aggregateAdvisory = BudgetRLService.generateAggregateAdvisory(smartRecommendations);
         console.log('Aggregate advisory:', JSON.stringify(aggregateAdvisory, null, 2));
       } else {
         console.log('No recommendations generated or empty recommendations array');

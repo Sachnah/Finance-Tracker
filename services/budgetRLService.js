@@ -46,26 +46,32 @@ class BudgetRLService {
      */
 
     static calculateBudgetPace(budget, spent, currentDay, daysInMonth) {
+        const budgetAmount = parseFloat(budget.amount) || 0;
+
+        // Ensure currentDay is at least 1 to avoid division by zero.
+        const daysPassed = Math.max(1, currentDay);
+
         // Calculate ideal spending by this point in month
-        const idealSpentByNow = (budget.amount / daysInMonth) * currentDay;
+        const idealSpentByNow = (budgetAmount / daysInMonth) * daysPassed;
         
         // Calculate spending pace as a percentage
         const pacePercentage = idealSpentByNow > 0 
             ? (spent / idealSpentByNow) * 100 
-            : 0;
+            : (spent > 0 ? Infinity : 0);
         
         // Calculate daily spending rate and projected total
-        const dailyRate = currentDay > 0 ? spent / currentDay : 0;
+        const dailyRate = spent / daysPassed;
         const projectedSpending = dailyRate * daysInMonth;
         
         // Determine remaining budget
-        const remaining = budget.amount - spent;
+        const remaining = budgetAmount - spent;
         
         // Calculate daily budget for rest of month
-        const remainingDays = daysInMonth - currentDay;
+        const remainingDays = daysInMonth - daysPassed;
         const dailyBudget = remainingDays > 0 ? remaining / remainingDays : 0;
         
         return {
+            spent,
             pacePercentage,
             dailyRate,
             projectedSpending,
@@ -81,6 +87,7 @@ class BudgetRLService {
     
     static getPaceRecommendation(category, paceData) {
         const { 
+            spent,
             pacePercentage, 
             projectedSpending, 
             remaining, 
@@ -91,20 +98,23 @@ class BudgetRLService {
         
         let message, type;
         
-        // Calculate spent amount from daily rate and current day
-        const today = new Date();
-        const spent = dailyRate * today.getDate();
+        const budgetAmount = parseFloat(budget.amount) || 0;
         
         // Format currency for better readability
         const formatCurrency = (amount) => {
+            const num = parseFloat(amount);
+            if (isNaN(num)) {
+                return new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NRs', maximumFractionDigits: 0 }).format(0);
+            }
             return new Intl.NumberFormat('en-NP', {
                 style: 'currency',
                 currency: 'NRs',
                 maximumFractionDigits: 0
-            }).format(amount);
+            }).format(num);
         };
         
         // Calculate days left in month
+        const today = new Date();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
         const daysLeft = daysInMonth - today.getDate();
         
@@ -112,29 +122,29 @@ class BudgetRLService {
         if (pacePercentage > 100) {
           type = 'warning';
           
-          if (remaining < 0) {
+          if (remaining <= 0) {
             // Already overspent
-            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget and there are ${daysLeft} days left. You've exceeded your limit.`;
+            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget and there are ${daysLeft} days left. You've exceeded your limit. STOP SPENDING.`;
           } else {
             // Projected to overspend
-            const daysUntilExceeded = Math.ceil(remaining / dailyRate);
-            message = `You've spent ${formatCurrency(spent)} of your ${category} budget and it's only the ${today.getDate()}th. At this pace, you'll exceed your limit in ${daysUntilExceeded} days.`;
+            const overBudgetAmount = projectedSpending - budgetAmount;
+            message = `You've spent ${formatCurrency(spent)} of your ${category} budget. At this pace, you are projected to spend ${formatCurrency(overBudgetAmount)} by the end of the month.`;
           }
         }
         // Caution - On track but close to limit (90%-100% of budget used)
         else if (pacePercentage >= 90) {
           type = 'caution';
           
-          const daysUntilExceeded = Math.ceil(remaining / dailyRate);
+          const daysUntilExceeded = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : Infinity;
           message = `You've spent ${formatCurrency(spent)} of your ${category} budget and it's only the ${today.getDate()}th. At this pace, you'll exceed your limit in ${daysUntilExceeded} days.`;
         }
-        // Positive - Well under budget (≤70% of budget used)
-        else if (pacePercentage <= 70) {
+        // Positive - Well under budget (≤60% of budget used)
+        else if (pacePercentage <= 60) {
           type = 'positive';
           
           message = `Only ${formatCurrency(spent)} of your ${category} budget used and ${daysLeft} days left. Strong financial control.`;
         }
-        // Info - On track (71%-89% of budget used)
+        // Info - On track (61%-89% of budget used)
         else {
           type = 'info';
           
@@ -143,204 +153,6 @@ class BudgetRLService {
         
         return { message, type };
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Generate an aggregate advisory based on all budget states
-     * Provides a holistic view of the user's financial situation
-     * NOTE: This function is currently not displayed in the UI
-     */
-    static generateAggregateAdvisory(recommendations) {
-        // If there are no recommendations, provide a simple message to add budgets
-        // NOTE: This aggregate advisory is not currently displayed in the UI
-        if (!recommendations || recommendations.length === 0) {
-            return { 
-                message: `📌 Budget Advisory\n"Add budgets for your main expense categories to get personalized financial advice."`, 
-                type: "info" 
-            };
-        }
-        
-        // Get detailed information for each recommendation
-        const detailedRecs = recommendations.map(rec => {
-            // Find the matching full recommendation object to get amounts
-            const amount = rec.amount || 0;
-            const spent = rec.spent || 0;
-            const remaining = amount - spent;
-            const pacePercentage = rec.pacePercentage || 0;
-            const overAmount = pacePercentage > 100 ? (spent - amount) : 0;
-            
-            return {
-                category: rec.category,
-                type: rec.type,
-                amount: amount,
-                spent: spent,
-                remaining: remaining,
-                pacePercentage: pacePercentage,
-                overAmount: overAmount
-            };
-        });
-        
-        // Group budgets by their status with detailed info
-        const overBudgetDetails = detailedRecs.filter(r => r.type === 'warning');
-        const nearLimitDetails = detailedRecs.filter(r => r.type === 'caution');
-        const underBudgetDetails = detailedRecs.filter(r => r.type === 'positive');
-        const onTrackDetails = detailedRecs.filter(r => r.type === 'info');
-        
-        // Simple category lists for easy reference
-        const overBudget = overBudgetDetails.map(r => r.category);
-        const nearLimit = nearLimitDetails.map(r => r.category);
-        const underBudget = underBudgetDetails.map(r => r.category);
-        const onTrack = onTrackDetails.map(r => r.category);
-        
-        let message = "";
-        let type = "info";
-        
-        // Determine the most severe status for the advisory type
-        if (overBudget.length > 0) {
-            type = "warning";
-        } else if (nearLimit.length > 0) {
-            type = "caution";
-        } else if (underBudget.length > 0 && onTrack.length === 0) {
-            type = "positive";
-        }
-        
-
-        
-        // Start with the title
-        message = `📌 Budget Advisory\n`;
-        
-        // Generate a supportive yet detailed advisory message
-        let advisoryContent = "";
-        
-        // Format currency for better readability
-        const formatCurrency = (amount) => {
-            return '₹' + Math.abs(Math.round(amount)).toLocaleString();
-        };
-        
-
-
-
-
-        // ALWAYS prioritize overspending and near limit categories first, but with encouraging tone
-        if (overBudget.length > 0) {
-            // Get total overspent amount
-            const totalOverspent = overBudgetDetails.reduce((sum, item) => sum + item.overAmount, 0);
-            
-            if (overBudget.length === 1) {
-                const item = overBudgetDetails[0];
-                advisoryContent += `Your ${item.category} budget needs attention - you've spent ${formatCurrency(item.spent)} which is ${formatCurrency(item.overAmount)} over your limit. `;
-            } else {
-                advisoryContent += `You've exceeded your budget in ${overBudget.join(' and ')} by a total of ${formatCurrency(totalOverspent)}. `;
-                
-                // Add details for each category
-                overBudgetDetails.forEach(item => {
-                    advisoryContent += `${item.category}: ${formatCurrency(item.overAmount)} over. `;
-                });
-            }
-            
-            if (nearLimit.length > 0) {
-                advisoryContent += `Also, watch your ${nearLimit.join(' and ')} spending - `;
-                
-                nearLimitDetails.forEach(item => {
-                    const percentRemaining = Math.round((item.remaining / item.amount) * 100);
-                    advisoryContent += `${item.category} has only ${formatCurrency(item.remaining)} (${percentRemaining}%) left. `;
-                });
-            }
-        } else if (nearLimit.length > 0) {
-            if (nearLimit.length === 1) {
-                const item = nearLimitDetails[0];
-                const percentUsed = Math.round((item.spent / item.amount) * 100);
-                advisoryContent += `You're doing well overall, but your ${item.category} budget is at ${percentUsed}% (${formatCurrency(item.remaining)} remaining). Try to limit spending here. `;
-            } else {
-                advisoryContent += `You're approaching your limits on ${nearLimit.join(' and ')}. `;
-                
-                // Add details for each category
-                nearLimitDetails.forEach(item => {
-                    const percentRemaining = Math.round((item.remaining / item.amount) * 100);
-                    advisoryContent += `${item.category}: ${percentRemaining}% (${formatCurrency(item.remaining)}) remaining. `;
-                });
-            }
-        }
-        
-        // Add positive reinforcement for under-budget categories
-        if (underBudget.length > 0) {
-            // Calculate total savings
-            const totalSavings = underBudgetDetails.reduce((sum, item) => sum + item.remaining, 0);
-            
-            if (overBudget.length > 0 || nearLimit.length > 0) {
-                // Suggest reallocation with specific amounts
-                if (underBudget.length === 1) {
-                    const item = underBudgetDetails[0];
-                    advisoryContent += `Great job with ${item.category} - you have ${formatCurrency(item.remaining)} available that could help cover your other categories. `;
-                } else {
-                    advisoryContent += `You're doing great with ${underBudget.join(' and ')} - total savings of ${formatCurrency(totalSavings)}. Consider reallocating some of this to cover your higher-spending areas. `;
-                }
-            } else {
-                // Just praise the savings
-                if (underBudget.length === 1) {
-                    const item = underBudgetDetails[0];
-                    const percentSaved = Math.round((item.remaining / item.amount) * 100);
-                    advisoryContent += `Excellent work with ${item.category}! You've spent only ${formatCurrency(item.spent)} (${100-percentSaved}% of budget). `;
-                } else {
-                    advisoryContent += `You're managing ${underBudget.join(' and ')} really well! Total savings: ${formatCurrency(totalSavings)}. `;
-                }
-            }
-        }
-        
-        // Mention on-track categories if we haven't mentioned overspending or near-limit
-        if (overBudget.length === 0 && nearLimit.length === 0 && onTrack.length > 0) {
-            if (advisoryContent) advisoryContent += ' ';
-            advisoryContent += `You're right on track with ${onTrack.join(' and ')}. Keep up the good work! `;
-        }
-        
-        // If we have recommendations but couldn't generate any content (edge case)
-        if (advisoryContent === "" && recommendations.length > 0) {
-            // Check if any recommendation shows overspending based on pace percentage
-            const overspendingRecs = recommendations.filter(r => r.pacePercentage && r.pacePercentage > 100);
-            
-            if (overspendingRecs.length > 0) {
-                const categories = overspendingRecs.map(r => r.category).join(' and ');
-                advisoryContent = `Your ${categories} spending needs attention - you're on pace to exceed your budget. Try to reduce expenses in these areas.`;
-            } else {
-                // Check if we're at least at 80% of any budget
-                const approachingRecs = recommendations.filter(r => r.pacePercentage && r.pacePercentage > 80);
-                
-                if (approachingRecs.length > 0) {
-                    const categories = approachingRecs.map(r => r.category).join(' and ');
-                    advisoryContent = `You're doing well overall! Just keep an eye on ${categories} - you've used over 80% of these budgets.`;
-                } else {
-                    advisoryContent = `Great job managing your finances! All your budgets are on track, with healthy spending levels across categories.`;
-                }
-            }
-        }
-        
-        message += `"${advisoryContent}"`;
-        
-        return { message, type };
-    }
-
-
-
-
-
-
 
 
 
