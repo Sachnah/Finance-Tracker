@@ -6,6 +6,7 @@ const { protect } = require('../middleware/auth');
 const { createObjectCsvWriter } = require('csv-writer');
 const path = require('path');
 const BudgetRLService = require('../services/budgetRLService');
+const { categorizeTransaction } = require('../services/categorizationService');
 
 // Protect all routes
 router.use(protect);
@@ -34,12 +35,17 @@ router.get('/', async (req, res) => {
 // Add new transaction
 router.post('/', async (req, res) => {
   try {
-    const { amount, type, category, description, date } = req.body;
+    let { amount, type, category, description, date } = req.body;
     
     // Validate inputs
-    if (!amount || !type || !category) {
-      req.flash('error_msg', 'Please provide amount, type and category');
+    if (!amount || !type) {
+      req.flash('error_msg', 'Please provide amount and type');
       return res.redirect('/transactions');
+    }
+
+    // If category is not provided by the user, auto-categorize it
+    if (!category) {
+        category = categorizeTransaction(description);
     }
 
     const newTransaction = new Transaction({
