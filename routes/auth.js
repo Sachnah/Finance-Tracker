@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
+const { sendVerificationEmail } = require('../services/emailService');
+const crypto = require('crypto');
 
 // GET /users/register
 // Render registration form
@@ -59,8 +61,14 @@ router.post('/register', async (req, res) => {
         password
       });
 
+      // Generate and save verification token
+      const verificationToken = user.generateEmailVerificationToken();
       await user.save();
-      req.flash('success_msg', 'You are now registered and can log in');
+
+      // Send verification email
+      await sendVerificationEmail(user.email, user.name, verificationToken);
+
+      req.flash('success_msg', 'A verification email has been sent. Please check your inbox to complete your registration.');
       res.redirect('/users/login');
     } catch (err) {
       console.error(err);
@@ -92,6 +100,12 @@ router.post('/login', async (req, res) => {
       return res.redirect('/users/login');
     }
 
+    // Check if user is verified
+    if (!user.isVerified) {
+      req.flash('error_msg', 'Please verify your email to log in. Check your inbox for a verification link.');
+      return res.redirect('/users/login');
+    }
+
     // Match password
     const isMatch = await user.matchPassword(password);
 
@@ -108,6 +122,40 @@ router.post('/login', async (req, res) => {
     console.error(err);
     req.flash('error_msg', 'Server error');
     res.redirect('/users/login');
+  }
+});
+
+// GET /users/verifyemail/:token
+// Verify user's email
+router.get('/verifyemail/:token', async (req, res) => {
+  try {
+    // Get hashed token
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      req.flash('error_msg', 'Verification token is invalid or has expired.');
+      return res.redirect('/users/register');
+    }
+
+    user.isVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    req.flash('success_msg', 'Email verified successfully! You can now log in.');
+    res.redirect('/users/login');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Server error during email verification.');
+    res.redirect('/users/register');
   }
 });
 

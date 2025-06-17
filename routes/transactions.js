@@ -7,6 +7,7 @@ const { createObjectCsvWriter } = require('csv-writer');
 const path = require('path');
 const BudgetRLService = require('../services/budgetRLService');
 const { categorizeTransaction } = require('../services/categorizationService');
+const { sendBudgetAlertEmail } = require('../services/emailService');
 
 // Protect all routes
 router.use(protect);
@@ -91,7 +92,11 @@ router.post('/', async (req, res) => {
         const totalSpent = monthTransactions.reduce((sum, tx) => sum + tx.amount, 0);
         
         if (totalSpent >= budget.amount * 0.9) {
-          req.flash('warning_msg', `Warning: You've spent ${Math.round((totalSpent / budget.amount) * 100)}% of your ${category} budget`);
+          const percentageSpent = Math.round((totalSpent / budget.amount) * 100);
+          req.flash('warning_msg', `Warning: You've spent ${percentageSpent}% of your ${category} budget`);
+          
+          // Send email alert
+          sendBudgetAlertEmail(req.user.email, req.user.name, category, percentageSpent);
         }
       }
     }
