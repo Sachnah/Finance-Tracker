@@ -24,6 +24,47 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Register</button>
             </form>
+            <script>
+                const form = document.querySelector('form');
+                const nameInput = document.getElementById('name');
+                const emailInput = document.getElementById('email');
+                const passwordInput = document.getElementById('password');
+
+                form.addEventListener('submit', (e) => {
+                    let errors = [];
+                    // Clear previous errors
+                    document.querySelectorAll('.error-message').forEach(el => el.remove());
+
+                    // Name validation: only letters and spaces
+                    const nameRegex = /^[a-zA-Z\s]+$/;
+                    if (!nameRegex.test(nameInput.value)) {
+                        errors.push({ input: nameInput, message: 'Name can only contain letters and spaces.' });
+                    }
+
+                    // Email validation
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(emailInput.value)) {
+                        errors.push({ input: emailInput, message: 'Please enter a valid email address.' });
+                    }
+
+                    // Password validation: at least 6 characters
+                    if (passwordInput.value.length < 6) {
+                        errors.push({ input: passwordInput, message: 'Password must be at least 6 characters long.' });
+                    }
+
+                    if (errors.length > 0) {
+                        e.preventDefault(); // Prevent form submission
+                        errors.forEach(error => {
+                            const errorElement = document.createElement('div');
+                            errorElement.className = 'text-danger error-message';
+                            errorElement.style.fontSize = '0.8rem';
+                            errorElement.style.marginTop = '0.2rem';
+                            errorElement.innerText = error.message;
+                            error.input.parentNode.insertBefore(errorElement, error.input.nextSibling);
+                        });
+                    }
+                });
+            </script>
             <p class="mt-4">
                 Have An Account? <a href="/users/login">Login</a>
             </p>

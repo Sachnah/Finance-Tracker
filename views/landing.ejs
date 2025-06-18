@@ -1,0 +1,108 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f7f8fc;
+    }
+
+    .landing-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly; /* Gives more space */
+        min-height: 95vh; /* A bit more height */
+        padding: 2rem;
+        padding-top: 4rem; /* Pushes content down a bit */
+    }
+
+    .text-content {
+        max-width: 550px; /* A bit wider */
+        text-align: left;
+    }
+
+    .creators {
+        font-size: 1rem;
+        color: #4a5568; /* Darker for better contrast */
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        display: inline-block; /* Ensures highlight only covers the text */
+        background: linear-gradient(to top, rgba(255, 240, 100, 0.6) 45%, transparent 45%);
+        padding: 0 0.2em; /* Adds a little space around the text for the highlight */
+    }
+
+    .main-heading {
+        font-size: 4rem; /* Larger heading */
+        font-weight: 700;
+        color: #2d3748; /* Darker, more professional color */
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+    }
+
+    .sub-heading {
+        font-size: 1.2rem; /* Larger subheading */
+        color: #5a677d; /* Darker, more readable color */
+        margin-bottom: 3rem; /* More space before button */
+        max-width: 500px;
+    }
+
+    .cta-btn {
+        background-color: #5a67d8;
+        color: #fff;
+        border: none;
+        padding: 1.1rem 2.8rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 14px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(90, 103, 216, 0.4);
+    }
+
+    .cta-btn:hover {
+        background-color: #bfc2d3;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(90, 103, 216, 0.5);
+    }
+
+    .cta-buttons {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem; /* Space between buttons */
+    }
+
+    .cta-btn.secondary {
+        background-color: #e2e8f0;
+        color: #4a5568;
+        box-shadow: none;
+    }
+
+    .cta-btn.secondary:hover {
+        background-color: #cbd5e0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        color: #2d3748;
+    }
+
+    .image-content {
+        max-width: 900px;
+    }
+
+    .image-content img {
+        width: 100%;
+        height: auto;
+    }
+</style>
+
+<div class="landing-container">
+    <div class="text-content">
+        <div class="creators">Made by Bibek, Sachana, Usmita</div>
+        <h1 class="main-heading">Finance Tracker</h1>
+        <p class="sub-heading">Take control of your spending with our intelligent budget pacing algorithm.</p>
+        <div class="cta-buttons">
+            <a href="/users/register" class="cta-btn">Get Started</a>
+            <a href="/users/login" class="cta-btn secondary">Login</a>
+        </div>
+    </div>
+    <div class="image-content">
+        <img src="/img/budget185.png" alt="Finance App Illustration">
+    </div>
+</div>

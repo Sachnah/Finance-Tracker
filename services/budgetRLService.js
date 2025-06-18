@@ -124,7 +124,7 @@ class BudgetRLService {
           
           if (remaining <= 0) {
             // Already overspent
-            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget and there are ${daysLeft} days left. You've exceeded your limit. STOP SPENDING.`;
+            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget and there is still ${daysLeft} days left. You've exceeded your limit. STOP SPENDING.`;
           } else {
             // Projected to overspend
             const overBudgetAmount = projectedSpending - budgetAmount;

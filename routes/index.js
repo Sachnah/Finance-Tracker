@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
   if (req.session.userId) {
     return res.redirect('/dashboard');
   }
-  res.render('index', {
+  res.render('landing', {
     path: '/' // For active sidebar 
   });
 });
