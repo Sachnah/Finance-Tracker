@@ -16,31 +16,99 @@ router.use(protect);
 // Get all transactions
 router.get('/', async (req, res) => {
   try {
-    const { type, search } = req.query;
-    const query = { user: req.user._id };
+    const { type, search, period = 'thisMonth' } = req.query;
+    const userQuery = { user: req.user._id };
 
-    if (type && type !== 'all') {
-      query.type = type;
+    // Date filtering for analytics
+    const now = new Date();
+    let startDate;
+    let endDate;
+    const dateFilter = {};
+
+    switch (period) {
+      case 'lastMonth':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        break;
+      case 'last7days':
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 6);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date();
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case 'thisMonth':
+      default:
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of current month
+        break;
     }
+    dateFilter.date = { $gte: startDate, $lte: endDate };
 
+    const analyticsTransactions = await Transaction.find({ ...userQuery, ...dateFilter });
+
+    // Process data for chart
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    // Create a map of all days in the period to ensure the chart shows empty days
+    const dayMap = new Map();
+    let iterDate = new Date(startDate);
+    iterDate.setHours(0, 0, 0, 0);
+
+    while (iterDate <= endDate) {
+        dayMap.set(iterDate.toISOString().split('T')[0], { income: 0, expense: 0 });
+        iterDate.setDate(iterDate.getDate() + 1);
+    }
+    
+    analyticsTransactions.forEach(t => {
+      const dateStr = new Date(t.date).toISOString().split('T')[0];
+      if (dayMap.has(dateStr)) {
+        if (t.type === 'income') {
+          dayMap.get(dateStr).income += t.amount;
+          totalIncome += t.amount;
+        } else {
+          dayMap.get(dateStr).expense += t.amount;
+          totalExpense += t.amount;
+        }
+      }
+    });
+
+    const sortedDates = Array.from(dayMap.keys()).sort();
+    
+    const chartData = {
+      labels: sortedDates.map(d => {
+        const [year, month, day] = d.split('-').map(Number);
+        const date = new Date(Date.UTC(year, month - 1, day));
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+      }),
+      income: sortedDates.map(d => dayMap.get(d).income),
+      expense: sortedDates.map(d => dayMap.get(d).expense),
+    };
+
+    // Filter for transaction list (shows all transactions, not just from the period)
+    const listQuery = { ...userQuery };
+    if (type && type !== 'all') listQuery.type = type;
     if (search) {
-      // Case-insensitive search on category and description
-      query.$or = [
+      listQuery.$or = [
         { category: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
       ];
     }
 
-    const transactions = await Transaction.find(query)
-      .sort({ date: -1 });
-    
+    const transactions = await Transaction.find(listQuery).sort({ date: -1 });
+
     res.render('transactions', {
       transactions,
-      BudgetRLService, // Make the service available in the template
       user: req.user,
-      path: '/transactions', // For active sidebar highlighting
+      path: '/transactions',
       type: type || 'all',
-      search: search || ''
+      search: search || '',
+      period,
+      chartData,
+      totalIncome,
+      totalExpense,
+      netAmount: totalIncome - totalExpense,
     });
   } catch (err) {
     console.error(err);
@@ -127,6 +195,15 @@ router.post('/', async (req, res) => {
   }
 });
 
+// GET /transactions/add
+// Show add transaction form
+router.get('/add', (req, res) => {
+  res.render('add-transaction', {
+    user: req.user,
+    path: '/transactions/add' // For active sidebar highlighting and script loading
+  });
+});
+
 // GET /transactions/:id/edit
 // Show edit transaction form
 router.get('/:id/edit', async (req, res) => {
@@ -143,7 +220,8 @@ router.get('/:id/edit', async (req, res) => {
 
     res.render('edit-transaction', {
       transaction,
-      user: req.user
+      user: req.user,
+      period: req.query.period || 'thisMonth'
     });
   } catch (err) {
     console.error(err);
@@ -182,7 +260,8 @@ router.put('/:id', async (req, res) => {
     });
     
     req.flash('success_msg', 'Transaction updated');
-    res.redirect('/transactions');
+    const { period = 'thisMonth' } = req.body;
+    res.redirect(`/transactions?period=${period}`);
   } catch (err) {
     console.error(err);
     req.flash('error_msg', 'Error updating transaction');

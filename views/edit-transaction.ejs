@@ -12,6 +12,7 @@
             </div>
             <div class="card-body">
                 <form action="/transactions/<%= transaction._id %>?_method=PUT" method="POST">
+          <input type="hidden" name="period" value="<%= period %>">
                     <div class="mb-3">
                         <label for="type" class="form-label">Type</label>
                         <select class="form-select" id="type" name="type" required>

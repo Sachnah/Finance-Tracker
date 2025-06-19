@@ -8,119 +8,53 @@
         <h1 class="mb-0" style="font-weight: 800; font-size: 2.5rem; color: #5b53f7; margin-bottom: 2rem;">Transactions</h1>
 
     </div>
-    <div class="col-md-6 text-md-end">
+    <div class="col-md-6 text-md-end d-flex gap-2 justify-content-end">
+        <a href="/transactions/add" class="btn btn-primary" style="border-radius: 10px; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fas fa-plus"></i> Add Transaction
+        </a>
         <a href="/transactions/export" class="btn btn-success" style="border-radius: 10px; display: inline-flex; align-items: center; gap: 8px;">
             <i class="fas fa-file-export"></i> Export Transactions
         </a>
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="budget-card" style="border-radius: 16px; overflow: hidden;">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0" style="font-weight: 600;">Transaction Overview</h4>
+                    <form action="/transactions" method="GET" id="periodForm">
+                                                <select name="period" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 150px;">
+                            <option value="thisMonth" <%= period === 'thisMonth' ? 'selected' : '' %>>This Month</option>
+                            <option value="lastMonth" <%= period === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
+                            <option value="last7days" <%= period === 'last7days' ? 'selected' : '' %>>Last 7 Days</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="row text-center mb-4">
+                    <div class="col-4">
+                        <h6 class="text-muted mb-1">Total Income</h6>
+                        <h4 class="fw-bold text-success"><%= formatNepaliCurrency(totalIncome) %></h4>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-muted mb-1">Total Expense</h6>
+                        <h4 class="fw-bold text-danger"><%= formatNepaliCurrency(totalExpense) %></h4>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-muted mb-1">Net</h6>
+                        <h4 class="fw-bold <%= netAmount >= 0 ? 'text-success' : 'text-danger' %>"><%= formatNepaliCurrency(netAmount) %></h4>
+                    </div>
+                </div>
+                                <canvas id="transactionChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Centered Wrapper -->
 <div class="row justify-content-center">
     <div class="col-xl-11">
-
-        <!-- Content Row 1 (Form + CSV) -->
-        <div class="row mb-4">
-            <div class="col-lg-7">
-                <div class="budget-card" style="border-radius: 16px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #4361ee, #3a56d4); padding: 20px; color: white;">
-                        <h4 class="mb-0" style="font-weight: 600;"><i class="fas fa-plus-circle me-2"></i> Log Your Transaction</h4>
-                    </div>
-                    <div class="p-4">
-                        <form action="/transactions" method="POST" id="transactionForm">
-                            <!-- Transaction Type with Toggle -->
-                            <div class="mb-4">
-                                <label class="form-label fw-medium mb-2">Transaction Type</label>
-                                <div class="d-flex" style="background-color: #f1f5f9; border-radius: 10px; padding: 4px;">
-                                    <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
-                                        <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense" checked style="display: none;" onchange="updateCategoryOptions()">
-                                        <label class="form-check-label type-label" for="typeExpense" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
-                                            <i class="fas fa-arrow-up text-danger me-2"></i> Expense
-                                        </label>
-                                    </div>
-                                    
-                                    <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
-                                        <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" style="display: none;" onchange="updateCategoryOptions()">
-                                        <label class="form-check-label type-label" for="typeIncome" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
-                                            <i class="fas fa-arrow-down text-success me-2"></i> Income
-                                        </label>
-                                    </div>
-                                    
-                                </div>
-                            </div>
-                            
-                            <!-- Amount with Large Input -->
-                            <div class="mb-4">
-                                <label for="amount" class="form-label fw-medium mb-2">Amount</label>
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text" style="background-color: #f8fafc; border-right: none;">₹</span>
-                                    <input type="number" class="form-control" id="amount" name="amount" step="1" required 
-                                        style="border-left: none; font-size: 1.5rem; height: 60px; font-weight: 600;" >
-                                </div>
-                            </div>
-                            
-                            <!-- Category with Icons -->
-                            <div class="mb-4">
-                                <label for="category" class="form-label fw-medium mb-2">Category</label>
-                                                        <select class="form-select form-select-lg" id="category" name="category" style="height: 60px;">
-                                    <!-- Categories will be dynamically populated by JavaScript -->
-                                </select>
-                            </div>
-                            
-                            <div class="row">
-                                <!-- Description -->
-                                <div class="col-md-7 mb-4">
-                                    <label for="description" class="form-label fw-medium mb-2">Description (Optional)</label>
-                                    <input type="text" class="form-control form-control-lg" id="description" name="description" 
-                                        placeholder="What's this for?" oninput="suggestCategory('description', 'category', 'categorySuggestion')">
-                                    <small id="categorySuggestion" class="form-text text-muted mt-1"></small>
-                                </div>
-                                
-                                <!-- Date -->
-                                <div class="col-md-5 mb-4">
-                                    <label for="date" class="form-label fw-medium mb-2">Date</label>
-                                    <input type="date" class="form-control form-control-lg" id="date" name="date" 
-                                        value="<%= new Date().toISOString().split('T')[0] %>" required>
-                                </div>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100 py-3" style="font-weight: 600; font-size: 1.1rem; border-radius: 12px;">
-                                <i class="fas fa-plus-circle me-2"></i> Add Transaction
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-5">
-                <div class="budget-card h-100" style="border-radius: 16px; overflow: hidden;">
-                    <div style="background: linear-gradient(135deg, #3a56d4, #4361ee); padding: 20px; color: white;">
-                        <h4 class="mb-0" style="font-weight: 600;"><i class="fas fa-info-circle me-2"></i> About CSV Export</h4>
-                    </div>
-                    <div class="p-4">
-                        <div class="d-flex align-items-center mb-4">
-                            <div style="width: 60px; height: 60px; border-radius: 15px; background-color: #ebf4ff; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                                <i class="fas fa-file-csv" style="font-size: 24px; color: #4361ee;"></i>
-                            </div>
-                            <div>
-                                <h5 class="mb-1">Export Your Financial Data</h5>
-                                <p class="mb-0 text-muted">Download all your transactions in CSV format for analysis in Excel or Google Sheets</p>
-                            </div>
-                        </div>
-                        
-                        <div class="p-3" style="background-color: #f8fafc; border-radius: 12px;">
-                            <h6 class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> What's Included</h6>
-                            <ul class="list-unstyled mb-0">
-                                <li class="mb-2"><i class="fas fa-calendar-day me-2 text-muted"></i> Transaction Date</li>
-                                <li class="mb-2"><i class="fas fa-tag me-2 text-muted"></i> Category</li>
-                                <li class="mb-2"><i class="fas fa-money-bill-wave me-2 text-muted"></i> Amount</li>
-                                <li class="mb-0"><i class="fas fa-align-left me-2 text-muted"></i> Description</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Content Row 2 (History) -->
         <div class="row">
@@ -178,12 +112,12 @@
                                                 <td class="px-4 py-3" style="color: #4a5568;">
                                                     <%= transaction.description || '-' %>
                                                 </td>
-                                                <td class="px-4 py-3 <%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>" style="font-weight: 600; font-size: 1.05rem;">
-                                                    <%= transaction.type === 'income' ? '+' : '-' %>₹<%= formatNepaliCurrency(transaction.amount) %>
+                                                                                                <td class="px-4 py-3 <%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>" style="font-weight: 600; font-size: 1.05rem;">
+                                                    <%= transaction.type === 'income' ? '+' : '-' %><%= formatNepaliCurrency(transaction.amount) %>
                                                 </td>
                                                 <td class="px-4 py-3 text-center">
                                                     <div class="d-flex justify-content-center gap-2">
-                                                        <a href="/transactions/<%= transaction._id %>/edit" class="btn btn-sm" style="background-color: #ebf4ff; color: #4361ee; border: none; border-radius: 8px;">
+                                                        <a href="/transactions/<%= transaction._id %>/edit?period=<%= period %>" class="btn btn-sm" style="background-color: #ebf4ff; color: #4361ee; border: none; border-radius: 8px;">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                         <form action="/transactions/<%= transaction._id %>?_method=DELETE" method="POST" class="d-inline">
@@ -214,3 +148,80 @@
 
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function formatNepaliCurrency(num) {
+        if (typeof num !== 'number') {
+            return num;
+        }
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(num);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('transactionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <%- JSON.stringify(chartData.labels) %>,
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: <%- JSON.stringify(chartData.income) %>,
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Expense',
+                        data: <%- JSON.stringify(chartData.expense) %>,
+                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: false,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        stacked: false,
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatNepaliCurrency(value);
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += formatNepaliCurrency(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>

@@ -84,7 +84,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <% if(typeof path !== 'undefined' && path === '/transactions') { %>
+    <% if(typeof path !== 'undefined' && (path === '/transactions' || path === '/transactions/add')) { %>
     <!-- Transaction Scripts -->
     <script src="/js/transaction-categories.js"></script>
     <script src="/js/transaction-ui.js"></script>
