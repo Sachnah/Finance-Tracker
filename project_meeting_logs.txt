@@ -8,78 +8,15 @@
 ## Project Supervisor
 [Supervisor Name]
 
----
 
-## Week 1 (August 15, 2024)
-
-### Items for Discussion:
-1. Initial project idea brainstorming
-2. Discussion of potential technologies to use
-3. Assignment of preliminary research tasks
-4. Timeline planning for the semester
-
-### Action List:
-1. Each member to research existing personal finance applications and create a list of features
-2. Investigate MongoDB, Express, and Node.js stack for backend development
-3. Create initial project proposal document with problem statement and objectives
-4. Set up GitHub repository for version control
-
-### Supervisor Feedback:
-- Suggested narrowing down the scope to ensure completion within the semester
-- Recommended focusing on core financial tracking features before adding advanced analytics
-- Advised on proposal format and requirements
-
----
-
-## Week 2 (August 22, 2024)
-
-### Items for Discussion:
-1. Review of research findings on existing finance applications
-2. Technology stack decision and justification
-3. Feature prioritization for MVP (Minimum Viable Product)
-4. Division of responsibilities among team members
-
-### Action List:
-1. Finalize project proposal with feature list, technology stack, and timeline
-2. Create database schema design for users, transactions, and budgets
-3. Set up development environment on each team member's computer
-4. Begin learning/refreshing knowledge on MongoDB and Express.js
-
-### Supervisor Feedback:
-- Approved technology stack choice
-- Suggested adding a section on security considerations in the proposal
-- Recommended creating user stories to better understand requirements
-
----
-
-## Week 3 (August 29, 2024)
-
-### Items for Discussion:
-1. Presentation of completed project proposal
-2. Database schema design review
-3. UI/UX mockups initial ideas
-4. Development approach (agile methodology)
-
-### Action List:
-1. Prepare for proposal presentation scheduled for next week
-2. Create detailed mockups for key application screens
-3. Implement basic Express.js server setup and MongoDB connection
-4. Define API endpoints for user authentication
-
-### Supervisor Feedback:
-- Provided feedback on proposal presentation slides
-- Suggested improvements to database schema for better scalability
-- Recommended implementing authentication early in the development process
-
----
 
 ## Week 4 (September 5, 2024)
 
-### Items for Discussion:
-1. Proposal presentation debrief
-2. Progress on server setup and database connection
-3. Authentication implementation approach
-4. UI design progress
+### Items for Discussion: 
+
+Progress on server setup and database connection
+Authentication implementation approach
+UI design progress
 
 ### Action List:
 1. Implement user registration and login functionality

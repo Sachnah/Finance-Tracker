@@ -83,6 +83,12 @@ router.get('/dashboard', protect, async (req, res) => {
       }
     });
     
+    // 5. Calculate totals for the view
+    const totalMonthlyBudget = Object.values(budgetUsage).reduce((sum, b) => sum + b.budget, 0);
+    const totalMonthlySpent = Object.values(budgetUsage)
+      .filter(b => b.budget > 0) // Only consider spending in categories with a budget
+      .reduce((sum, b) => sum + b.spent, 0);
+
     res.render('dashboard', {
       user: req.user,
       totalIncome,
@@ -90,6 +96,8 @@ router.get('/dashboard', protect, async (req, res) => {
       balance,
       transactions: transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5),
       budgetUsage,
+      totalMonthlyBudget,
+      totalMonthlySpent,
       path: '/dashboard' // For active sidebar highlighting
     });
   } catch (err) {
