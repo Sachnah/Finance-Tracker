@@ -33,31 +33,48 @@ router.get('/dashboard', protect, async (req, res) => {
     
     const balance = Math.max(0, totalIncome - totalExpense);
     
-    // Get current month's budgets
+    // Get current month's expenses and budgets
     const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
+    const currentMonth = currentDate.getMonth(); // 0-indexed for Date object
     const currentYear = currentDate.getFullYear();
-    
+
+    // 1. Filter for current month's expenses
+    const monthlyExpenses = transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      return t.type === 'expense' &&
+             transactionDate.getMonth() === currentMonth &&
+             transactionDate.getFullYear() === currentYear;
+    });
+
+    // 2. Group expenses by category
+    const expensesByCategory = {};
+    monthlyExpenses.forEach(transaction => {
+      if (!expensesByCategory[transaction.category]) {
+        expensesByCategory[transaction.category] = 0;
+      }
+      expensesByCategory[transaction.category] += transaction.amount;
+    });
+
+    // 3. Fetch budgets for the current month
     const budgets = await Budget.find({
       user: req.user._id,
-      month: currentMonth,
+      month: currentMonth + 1, // In schema, month is 1-indexed
       year: currentYear
     });
-    
-    // Calculate budget usage
+    const budgetMap = budgets.reduce((map, b) => {
+      map[b.category] = b.amount;
+      return map;
+    }, {});
+
+    // 4. Combine expenses and budgets into a single object for the view
     const budgetUsage = {};
-    budgets.forEach(budget => {
-      const spent = transactions
-        .filter(t => t.type === 'expense' && 
-                t.category === budget.category &&
-                new Date(t.date).getMonth() + 1 === budget.month &&
-                new Date(t.date).getFullYear() === budget.year)
-        .reduce((sum, tx) => sum + tx.amount, 0);
-      
-      budgetUsage[budget.category] = {
-        budget: budget.amount,
-        spent,
-        percentage: budget.amount > 0 ? (spent / budget.amount) * 100 : 0
+    Object.keys(expensesByCategory).forEach(category => {
+      const spent = expensesByCategory[category];
+      const budgetAmount = budgetMap[category] || 0;
+      budgetUsage[category] = {
+        budget: budgetAmount,
+        spent: spent,
+        percentage: budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0
       };
     });
     

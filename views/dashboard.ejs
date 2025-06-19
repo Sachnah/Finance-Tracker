@@ -1,112 +1,166 @@
-<% /* %>
-<div class="row mb-4 align-items-center">
-    <div class="col-md-6">
-        <h1 class="page-title">Dashboard</h1>
+<style>
+    .dashboard-card {
+        background-color: #fff;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1.5rem;
+    }
+    .progress-bar-container {
+        position: relative;
+    }
+    .progress-bar-percentage {
+        position: absolute;
+        right: 0;
+        top: -20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #6b7280;
+    }
+    .dashboard-card .progress-bar {
+        background-color: #4F46E5;
+        width: var(--progress-width, 0%);
+    }
+</style>
+
+<% 
+    let totalBudget = 0;
+    let totalSpent = 0;
+    if (Object.keys(budgetUsage).length > 0) {
+        totalSpent = totalExpense;
+        Object.values(budgetUsage).forEach(data => {
+            totalBudget += data.budget;
+        });
+    }
+    const budgetPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+%>
+
+<div class="row">
+    <div class="col-12">
+        <h1 style="font-weight: 800; font-size: 2.5rem; color: #4F46E5; margin-bottom: 2rem;">Dashboard</h1>
     </div>
-    <div class="col-md-6 text-end">
-        <div class="d-flex justify-content-end align-items-center">
-            <span class="me-2">Welcome, <%= user.username %></span>
-            <a href="/users/logout" class="btn btn-primary">Logout</a>
+</div>
+
+<!-- Monthly Budget -->
+<div class="dashboard-card">
+    <h5>Monthly Budget</h5>
+    <p class="text-muted">₹<%= formatNepaliCurrency(totalSpent) %> of ₹<%= formatNepaliCurrency(totalBudget) %> spent</p>
+    <div class="progress-bar-container">
+        <div class="progress" style="height: 8px;">
+            <div class="progress-bar" role="progressbar" style="--progress-width: <%= budgetPercentage.toFixed(2) %>%;" aria-valuenow="<%= budgetPercentage.toFixed(2) %>" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
+        <span class="progress-bar-percentage"><%= budgetPercentage.toFixed(1) %>% used</span>
     </div>
 </div>
 
 <div class="row">
-    <!-- Summary Cards -->
-    <div class="col-md-4">
-        <div class="card summary-card">
-            <div class="card-body">
-                <h5 class="card-title">Total Income</h5>
-                <p class="card-text fs-4">Rs <%= formatNepaliCurrency(totalIncome) %></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card summary-card">
-            <div class="card-body">
-                <h5 class="card-title">Total Expense</h5>
-                <p class="card-text fs-4">Rs <%= formatNepaliCurrency(totalExpense) %></p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card summary-card">
-            <div class="card-body">
-                <h5 class="card-title">Net Savings</h5>
-                <p class="card-text fs-4">Rs <%= formatNepaliCurrency(totalIncome - totalExpense) %></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
     <!-- Recent Transactions -->
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                Recent Transactions
+        <div class="dashboard-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Recent Transactions</h5>
+                <a href="/transactions" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <ul class="list-group list-group-flush">
-                <% recentTransactions.forEach(function(transaction) { %>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-bold"><%= transaction.description %></span>
-                            <small class="d-block text-muted"><%= transaction.category %></small>
-                        </div>
-                        <span class="<%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>">
-                            <%= transaction.type === 'income' ? '+' : '-' %>Rs <%= formatNepaliCurrency(transaction.amount) %>
-                        </span>
-                    </li>
-                <% }); %>
+                <% if (transactions.length > 0) { %>
+                    <% transactions.slice(0, 5).forEach(function(transaction) { %>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <p class="mb-0 fw-bold"><%= transaction.category %></p>
+                                <small class="text-muted"><%= new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></small>
+                            </div>
+                            <span class="fw-bold <%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>">
+                                <%= transaction.type === 'income' ? '+' : '-' %> ₹<%= formatNepaliCurrency(transaction.amount) %>
+                            </span>
+                        </li>
+                    <% }); %>
+                <% } else { %>
+                    <p class="text-center text-muted">No recent transactions.</p>
+                <% } %>
             </ul>
         </div>
     </div>
 
-    <!-- Spending by Category -->
+    <!-- Monthly Expense Breakdown -->
     <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                Spending by Category
-            </div>
-            <div class="card-body">
-                <canvas id="spendingChart"></canvas>
+        <div class="dashboard-card h-100">
+            <h5 class="mb-3">Monthly Expense Breakdown</h5>
+            <div style="height: 340px;">
+                <canvas id="expenseBreakdownChart"></canvas>
             </div>
         </div>
     </div>
 </div>
-<% */ %>
 
-<style>
-    .coming-soon-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 80vh;
-        text-align: center;
-        background-color: #f8f9fa;
-        border-radius: 16px;
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded.');
+        return;
     }
-    .coming-soon-icon {
-        font-size: 5rem;
-        color: #4361ee;
+    if (typeof formatNepaliCurrency === 'undefined') {
+        window.formatNepaliCurrency = function(num) { return '₹' + (num ? num.toFixed(2) : '0.00'); };
     }
-    .coming-soon-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-top: 20px;
-        color: #2d3748;
-    }
-    .coming-soon-text {
-        font-size: 1.2rem;
-        color: #6c757d;
-        max-width: 500px;
-        margin-top: 10px;
-    }
-</style>
 
-<div class="coming-soon-container">
-    <i class="fas fa-rocket coming-soon-icon"></i>
-    <h1 class="coming-soon-title">Being Developed!</h1>
-    <p class="coming-soon-text">We are working hard to bring you an amazing new dashboard experience. Stay tuned for updates!</p>
-</div>
+        const expenseDataJSON = `<%- JSON.stringify(budgetUsage) %>`;
+    try {
+        const expenseData = JSON.parse(expenseDataJSON);
+        const labels = Object.keys(expenseData);
+        const data = Object.values(expenseData).map(d => d.spent);
+
+        const expenseCtx = document.getElementById('expenseBreakdownChart');
+        if (expenseCtx && labels.length > 0) {
+            new Chart(expenseCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Expenses',
+                        data: data,
+                        backgroundColor: [
+                            '#4F46E5', '#818CF8', '#A78BFA', '#F87171', '#FBBF24', '#34D399', '#FB923C', '#F472B6', '#60A5FA', '#A3E635', '#2DD4BF', '#C084FC'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatNepaliCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else if (expenseCtx) {
+            const parent = expenseCtx.parentElement;
+            parent.innerHTML = '<div class="text-center text-muted d-flex align-items-center justify-content-center h-100"><p>No expense data for this month.</p></div>';
+        }
+    } catch (e) {
+        console.error('Failed to parse expense data:', e);
+        const expenseCtx = document.getElementById('expenseBreakdownChart');
+        if (expenseCtx) {
+            const parent = expenseCtx.parentElement;
+            parent.innerHTML = '<div class="text-center text-muted d-flex align-items-center justify-content-center h-100"><p>Could not load chart data.</p></div>';
+        }
+    }
+});
+</script>
+
+

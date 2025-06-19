@@ -1,0 +1,112 @@
+<% /* %>
+<div class="row mb-4 align-items-center">
+    <div class="col-md-6">
+        <h1 class="page-title">Dashboard</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <div class="d-flex justify-content-end align-items-center">
+            <span class="me-2">Welcome, <%= user.username %></span>
+            <a href="/users/logout" class="btn btn-primary">Logout</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Summary Cards -->
+    <div class="col-md-4">
+        <div class="card summary-card">
+            <div class="card-body">
+                <h5 class="card-title">Total Income</h5>
+                <p class="card-text fs-4">Rs <%= formatNepaliCurrency(totalIncome) %></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card summary-card">
+            <div class="card-body">
+                <h5 class="card-title">Total Expense</h5>
+                <p class="card-text fs-4">Rs <%= formatNepaliCurrency(totalExpense) %></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card summary-card">
+            <div class="card-body">
+                <h5 class="card-title">Net Savings</h5>
+                <p class="card-text fs-4">Rs <%= formatNepaliCurrency(totalIncome - totalExpense) %></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Recent Transactions -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Recent Transactions
+            </div>
+            <ul class="list-group list-group-flush">
+                <% recentTransactions.forEach(function(transaction) { %>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold"><%= transaction.description %></span>
+                            <small class="d-block text-muted"><%= transaction.category %></small>
+                        </div>
+                        <span class="<%= transaction.type === 'income' ? 'text-success' : 'text-danger' %>">
+                            <%= transaction.type === 'income' ? '+' : '-' %>Rs <%= formatNepaliCurrency(transaction.amount) %>
+                        </span>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Spending by Category -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Spending by Category
+            </div>
+            <div class="card-body">
+                <canvas id="spendingChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<% */ %>
+
+<style>
+    .coming-soon-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 80vh;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-radius: 16px;
+    }
+    .coming-soon-icon {
+        font-size: 5rem;
+        color: #4361ee;
+    }
+    .coming-soon-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-top: 20px;
+        color: #2d3748;
+    }
+    .coming-soon-text {
+        font-size: 1.2rem;
+        color: #6c757d;
+        max-width: 500px;
+        margin-top: 10px;
+    }
+</style>
+
+<div class="coming-soon-container">
+    <i class="fas fa-rocket coming-soon-icon"></i>
+    <h1 class="coming-soon-title">Being Developed!</h1>
+    <p class="coming-soon-text">We are working hard to bring you an amazing new dashboard experience. Stay tuned for updates!</p>
+</div>
