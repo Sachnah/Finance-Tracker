@@ -1,24 +1,78 @@
-<div class="row">
-    <div class="col-md-6 mx-auto">
-        <div class="card card-body">
-            <h1 class="text-center mb-3">
-                <i class="fas fa-user-circle"></i> Profile
-            </h1>
-            <div class="mb-3">
-                <label class="form-label">Name</label>
-                <input type="text" class="form-control" value="<%= user.name %>" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" value="<%= user.email %>" readonly>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Account Created</label>
-                <input type="text" class="form-control" value="<%= new Date(user.date).toLocaleDateString() %>" readonly>
-            </div>
-            <div class="d-grid gap-2">
-                <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
-            </div>
+<style>
+    .profile-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        background: #fff;
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #E5E7EB;
+    }
+    .profile-header {
+        text-align: center;
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #111827;
+    }
+    .profile-header i {
+        margin-right: 0.75rem;
+    }
+    .profile-info .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+    .profile-info .form-control[readonly] {
+        background-color: #F3F4F6;
+        border: 1px solid #E5E7EB;
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+        color: #111827;
+        border-radius: 8px;
+    }
+    .profile-buttons .btn {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: none;
+    }
+    .profile-buttons .btn-dashboard {
+        background-color: #4F46E5;
+        color: #fff;
+    }
+    .profile-buttons .btn-logout {
+        background-color: #EF4444;
+        color: #fff;
+    }
+</style>
+
+<div class="profile-container">
+    <h1 class="profile-header">
+        <i class="fas fa-user-circle"></i> Profile
+    </h1>
+    <div class="profile-info">
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" value="<%= user.name %>" readonly>
         </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" value="<%= user.email %>" readonly>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Account Created</label>
+            <input type="text" class="form-control" value="<%= new Date(user.date).toLocaleDateString() %>" readonly>
+        </div>
+    </div>
+    <div class="d-grid gap-2 mt-4 profile-buttons">
+        <a href="/dashboard" class="btn btn-dashboard">Back to Dashboard</a>
+        <a href="/users/logout" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
