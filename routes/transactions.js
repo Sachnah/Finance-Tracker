@@ -16,14 +16,31 @@ router.use(protect);
 // Get all transactions
 router.get('/', async (req, res) => {
   try {
-    const transactions = await Transaction.find({ user: req.user._id })
+    const { type, search } = req.query;
+    const query = { user: req.user._id };
+
+    if (type && type !== 'all') {
+      query.type = type;
+    }
+
+    if (search) {
+      // Case-insensitive search on category and description
+      query.$or = [
+        { category: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const transactions = await Transaction.find(query)
       .sort({ date: -1 });
     
     res.render('transactions', {
       transactions,
       BudgetRLService, // Make the service available in the template
       user: req.user,
-      path: '/transactions' // For active sidebar highlighting
+      path: '/transactions', // For active sidebar highlighting
+      type: type || 'all',
+      search: search || ''
     });
   } catch (err) {
     console.error(err);

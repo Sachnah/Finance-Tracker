@@ -27,9 +27,9 @@
     let totalBudget = 0;
     let totalSpent = 0;
     if (Object.keys(budgetUsage).length > 0) {
-        totalSpent = totalExpense;
         Object.values(budgetUsage).forEach(data => {
             totalBudget += data.budget;
+            totalSpent += data.spent;
         });
     }
     const budgetPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;

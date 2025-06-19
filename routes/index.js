@@ -68,14 +68,19 @@ router.get('/dashboard', protect, async (req, res) => {
 
     // 4. Combine expenses and budgets into a single object for the view
     const budgetUsage = {};
-    Object.keys(expensesByCategory).forEach(category => {
-      const spent = expensesByCategory[category];
+    const allCategories = new Set([...Object.keys(budgetMap), ...Object.keys(expensesByCategory)]);
+
+    allCategories.forEach(category => {
+      const spent = expensesByCategory[category] || 0;
       const budgetAmount = budgetMap[category] || 0;
-      budgetUsage[category] = {
-        budget: budgetAmount,
-        spent: spent,
-        percentage: budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0
-      };
+      
+      if (budgetAmount > 0 || spent > 0) {
+        budgetUsage[category] = {
+          budget: budgetAmount,
+          spent: spent,
+          percentage: budgetAmount > 0 ? (spent / budgetAmount) * 100 : 0
+        };
+      }
     });
     
     res.render('dashboard', {

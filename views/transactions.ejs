@@ -5,7 +5,8 @@
 
 <div class="row mb-4 align-items-center">
     <div class="col-md-6">
-        <h1 class="mb-0" style="font-size: 2.2rem; font-weight: 700; color: #2d3748;">Transactions</h1>
+        <h1 class="mb-0" style="font-weight: 800; font-size: 2.5rem; color: #5b53f7; margin-bottom: 2rem;">Transactions</h1>
+
     </div>
     <div class="col-md-6 text-md-end">
         <a href="/transactions/export" class="btn btn-success" style="border-radius: 10px; display: inline-flex; align-items: center; gap: 8px;">
@@ -41,7 +42,7 @@
                                     <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
                                         <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" style="display: none;" onchange="updateCategoryOptions()">
                                         <label class="form-check-label type-label" for="typeIncome" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
-                                            <i class="fas fa-arrow-down text-success me-2"></i> Balance
+                                            <i class="fas fa-arrow-down text-success me-2"></i> Income
                                         </label>
                                     </div>
                                     
@@ -128,12 +129,20 @@
                     <div style="background: linear-gradient(135deg, #4361ee, #3a56d4); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
                         <h4 class="mb-0" style="font-weight: 600;"><i class="fas fa-history me-2"></i> Transaction History</h4>
                         <div class="d-flex gap-2">
-                            <div class="input-group input-group-sm" style="width: 200px;">
-                                <input type="text" id="transactionSearch" class="form-control" placeholder="Search transactions..." style="border-radius: 8px 0 0 8px;">
-                                <button class="btn btn-light" type="button" style="border-radius: 0 8px 8px 0;">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
+                            <form action="/transactions" method="GET" id="filterForm" class="d-flex gap-3 align-items-center">
+                                <div class="input-group input-group-sm" style="width: 200px;">
+                                    <span class="input-group-text bg-light" style="border-right: none; border-radius: 8px 0 0 8px;"><i class="fas fa-search"></i></span>
+                                    <input type="text" id="transactionSearch" name="search" class="form-control" placeholder="Search..." value="<%= typeof search !== 'undefined' ? search : '' %>" style="border-left: none; border-radius: 0 8px 8px 0;">
+                                </div>
+                                <div class="input-group input-group-sm" style="width: 150px;">
+                                    <label class="input-group-text bg-light" for="typeFilter"><i class="fas fa-filter"></i></label>
+                                    <select name="type" id="typeFilter" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <option value="all" <%= (typeof type === 'undefined' || type === 'all') ? 'selected' : '' %>>All Types</option>
+                                        <option value="income" <%= (typeof type !== 'undefined' && type === 'income') ? 'selected' : '' %>>Income</option>
+                                        <option value="expense" <%= (typeof type !== 'undefined' && type === 'expense') ? 'selected' : '' %>>Expense</option>
+                                    </select>
+                                </div>
+                            </form>
                         </div>
                     </div>
                     <div class="p-0">
