@@ -96,7 +96,17 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    const transactions = await Transaction.find(listQuery).sort({ date: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 8;
+    const skip = (page - 1) * limit;
+
+    const totalTransactions = await Transaction.countDocuments(listQuery);
+    const transactions = await Transaction.find(listQuery)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(totalTransactions / limit);
 
     res.render('transactions', {
       transactions,
@@ -109,6 +119,8 @@ router.get('/', async (req, res) => {
       totalIncome,
       totalExpense,
       netAmount: totalIncome - totalExpense,
+      currentPage: page,
+      totalPages,
     });
   } catch (err) {
     console.error(err);
