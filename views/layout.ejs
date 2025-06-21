@@ -114,9 +114,9 @@
       // Only add decimal part if it exists and is not "00"
       // Also handle cases where decimalPart might be undefined (for integers)
       if (decimalPart && decimalPart !== "00") {
-        return `₹${formattedInteger}.${decimalPart}`;
+        return `Rs${formattedInteger}.${decimalPart}`;
       } else {
-        return `₹${formattedInteger}`;
+        return `Rs${formattedInteger}`;
       }
     }
     </script>

@@ -33,20 +33,19 @@
                     </form>
                 </div>
                 <div class="row text-center mb-4">
-                    <div class="col-4">
+                    <div class="col-6">
                         <h6 class="text-muted mb-1">Total Income</h6>
                         <h4 class="fw-bold text-success"><%= formatNepaliCurrency(totalIncome) %></h4>
                     </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <h6 class="text-muted mb-1">Total Expense</h6>
                         <h4 class="fw-bold text-danger"><%= formatNepaliCurrency(totalExpense) %></h4>
                     </div>
-                    <div class="col-4">
-                        <h6 class="text-muted mb-1">Net</h6>
-                        <h4 class="fw-bold <%= netAmount >= 0 ? 'text-success' : 'text-danger' %>"><%= formatNepaliCurrency(netAmount) %></h4>
-                    </div>
                 </div>
-                                <canvas id="transactionChart" style="max-height: 300px;"></canvas>
+                                <canvas id="transactionChart" style="max-height: 300px;"
+                    data-labels='<%- JSON.stringify(chartData.labels) %>'
+                    data-income='<%- JSON.stringify(chartData.income) %>'
+                    data-expense='<%- JSON.stringify(chartData.expense) %>'></canvas>
             </div>
         </div>
     </div>
@@ -99,7 +98,7 @@
                                                     <div class="d-flex align-items-center">
                                                           <% const iconBgClass = transaction.type === 'income' ? 'transaction-icon-income' : 'transaction-icon-expense'; %>
                                                           <div class="<%= iconBgClass %>" style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                                                              <i class="<%= transaction.type === 'income' ? 'fas fa-arrow-down text-success' : 'fas fa-arrow-up text-danger' %>"></i>
+                                                              <i class="<%= transaction.type === 'income' ? 'fas fa-arrow-up text-success' : 'fas fa-arrow-down text-danger' %>"></i>
                                                           </div>
                                                         <%= new Date(transaction.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
                                                     </div>
@@ -170,16 +169,17 @@
         }
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
-            currency: 'INR',
+            currency: 'Rs',
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }).format(num);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const chartLabels = <%- JSON.stringify(chartData.labels) %>;
-        const chartIncomeData = <%- JSON.stringify(chartData.income) %>;
-        const chartExpenseData = <%- JSON.stringify(chartData.expense) %>;
+        const chartElement = document.getElementById('transactionChart');
+        const chartLabels = JSON.parse(chartElement.dataset.labels || '[]');
+        const chartIncomeData = JSON.parse(chartElement.dataset.income || '[]');
+        const chartExpenseData = JSON.parse(chartElement.dataset.expense || '[]');
 
         const ctx = document.getElementById('transactionChart').getContext('2d');
         new Chart(ctx, {

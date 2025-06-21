@@ -122,13 +122,16 @@ class BudgetRLService {
         if (pacePercentage > 100) {
           type = 'warning';
           
-          if (remaining <= 0) {
+          if (remaining === 0) {
+            // Exactly at budget
+            message = `You have spent the entire budget for the ${category} category. Be careful with any further spending.`;
+          } else if (remaining < 0) {
             // Already overspent
-            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget and there is still ${daysLeft} days left. You've exceeded your limit. STOP SPENDING.`;
+            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget. You've exceeded your limit. STOP spending.`;
           } else {
             // Projected to overspend
             const overBudgetAmount = projectedSpending - budgetAmount;
-            message = `You've spent ${formatCurrency(spent)} of your ${category} budget. At this pace, you are projected to spend ${formatCurrency(overBudgetAmount)} by the end of the month.`;
+            message = `You've spent ${formatCurrency(spent)} of your ${category} budget. At this pace, you are projected to go over budget by ${formatCurrency(overBudgetAmount)}.`;
           }
         }
         // Caution - On track but close to limit (90%-100% of budget used)
@@ -136,7 +139,7 @@ class BudgetRLService {
           type = 'caution';
           
           const daysUntilExceeded = dailyRate > 0 ? Math.ceil(remaining / dailyRate) : Infinity;
-          message = `You've spent ${formatCurrency(spent)} of your ${category} budget and it's only the ${today.getDate()}th. At this pace, you'll exceed your limit in ${daysUntilExceeded} days.`;
+          message = `You've spent ${formatCurrency(spent)} of your ${category} budget. At this pace, you'll exceed your limit in ${daysUntilExceeded} days. CONTROL your spending.`;
         }
         // Positive - Well under budget (≤60% of budget used)
         else if (pacePercentage <= 60) {
@@ -204,60 +207,70 @@ class BudgetRLService {
         console.log(`Generating recommendations for ${budgets.length} budgets`);
         
         // Process each budget
-        for (const budget of budgets) {
-            // Only process current month's budgets
-            if (budget.month !== currentMonth || budget.year !== currentYear) {
-                console.log(`Skipping budget for ${budget.category} - not current month/year`);
-                continue;
+        const formatCurrency = (amount) => {
+            const num = parseFloat(amount);
+            if (isNaN(num)) {
+                return 'Rs 0';
             }
-            
-            console.log(`Processing budget for category: ${budget.category}`);
-            
-            // Calculate spending for this budget
+            return 'Rs ' + Math.round(num).toLocaleString('en-IN');
+        };
+
+        for (const budget of budgets) {
             const spent = transactions
                 .filter(t => t.type === 'expense' && 
                            t.category === budget.category && 
                            new Date(t.date).getMonth() + 1 === budget.month && 
                            new Date(t.date).getFullYear() === budget.year)
                 .reduce((sum, tx) => sum + tx.amount, 0);
-            
-            console.log(`${budget.category} - Budget: ${budget.amount}, Spent: ${spent}`);
-            
-            // For budgets with no spending, provide a different insight instead of skipping
-            if (spent === 0) {
-                // Add a recommendation for budgets with no transactions
-                const noSpendingMessage = `No spending recorded for ${budget.category} yet. Your full budget of ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(budget.amount)} is available.`;
+
+            // Check if the budget is for the current month
+            if (budget.month === currentMonth && budget.year === currentYear) {
+                // Current month logic
+                console.log(`Processing current month budget for category: ${budget.category}`);
                 
-                console.log(`${budget.category} - No spending: ${noSpendingMessage}`);
+                if (spent === 0) {
+                    const noSpendingMessage = `No spending recorded for ${budget.category} yet. Your full budget of ${formatCurrency(budget.amount)} is available.`;
+                    recommendations.push({
+                        category: budget.category,
+                        message: noSpendingMessage,
+                        type: 'info',
+                        icon: 'fas fa-info-circle'
+                    });
+                    continue;
+                }
+                
+                const paceData = this.calculateBudgetPace(budget, spent, currentDay, daysInMonth);
+                paceData.budget = budget.amount; // Pass budget amount to paceData
+                const recommendation = this.getPaceRecommendation(budget.category, paceData);
                 
                 recommendations.push({
                     category: budget.category,
-                    message: noSpendingMessage,
-                    type: 'info',
-                    date: new Date(),
-                    pacePercentage: 0
+                    message: recommendation.message,
+                    type: recommendation.type,
+                    icon: recommendation.icon || 'fas fa-chart-line'
                 });
-                continue;
+
+            } else {
+                // Logic for past or future months
+                const budgetDate = new Date(budget.year, budget.month - 1);
+                const todayDateStartOfMonth = new Date(currentYear, currentMonth - 1);
+                
+                let message;
+                if (budgetDate < todayDateStartOfMonth) {
+                    // Past month
+                    message = `For this past month, you spent ${formatCurrency(spent)} of your ${formatCurrency(budget.amount)} budget.`;
+                } else {
+                    // Future month
+                    message = `You have a budget of ${formatCurrency(budget.amount)} set for a future month.`;
+                }
+                
+                recommendations.push({
+                    category: budget.category,
+                    message: message,
+                    type: 'info',
+                    icon: 'fas fa-history'
+                });
             }
-            
-            // Calculate budget pacing metrics
-            const paceData = this.calculateBudgetPace(budget, spent, currentDay, daysInMonth);
-            paceData.budget = budget.amount;
-            
-            // Get recommendation based on pace
-            const recommendation = this.getPaceRecommendation(budget.category, paceData);
-            
-            console.log(`${budget.category} - Generated recommendation: ${recommendation.message} (${recommendation.type})`);
-            
-            // Add to recommendations list
-            recommendations.push({
-                category: budget.category,
-                message: recommendation.message,
-                type: recommendation.type,
-                date: new Date(),
-                pacePercentage: paceData.pacePercentage
-                // RL-specific properties have been removed
-            });
         }
         
         // Add overall budget recommendation if we have multiple budgets
@@ -529,7 +542,53 @@ class BudgetRLService {
             const transactions = await Transaction.find({ user: userId });
             
             // Generate fresh recommendations
-            await this.generateRecommendations(userId, budgets, transactions);
+            const recommendations = [];
+            for (const budget of budgets) {
+                const { category, amount: budgetAmount, transactions: budgetTransactions, month: budgetMonth, year: budgetYear } = budget;
+                
+                if (!budgetAmount || budgetAmount <= 0) {
+                    recommendations.push({
+                        category,
+                        message: 'No budget set for this category.',
+                        type: 'info',
+                        icon: 'fas fa-info-circle'
+                    });
+                } else {
+                    const spent = budgetTransactions.reduce((sum, t) => sum + t.amount, 0);
+                    const remaining = budgetAmount - spent;
+                    
+                    if (budgetYear !== currentYear || budgetMonth !== currentMonth) {
+                        const budgetDate = new Date(budgetYear, budgetMonth - 1, 1);
+                        const todayDate = new Date(currentYear, currentMonth - 1, 1);
+                        
+                        let message;
+                        if (budgetDate < todayDate) {
+                            message = `For this past month, you spent ${formatCurrency(spent)} of your ${formatCurrency(budgetAmount)} budget.`;
+                        } else {
+                            message = `You have a budget of ${formatCurrency(budgetAmount)} set for a future month.`;
+                        }
+                        
+                        recommendations.push({
+                            category,
+                            message,
+                            type: 'info',
+                            icon: 'fas fa-history'
+                        });
+                    } else {
+                        const percentageSpent = (spent / budgetAmount) * 100;
+                        const message = `You have spent ${formatCurrency(spent)} of your ${formatCurrency(budgetAmount)} budget (${percentageSpent.toFixed(2)}%).`;
+                        
+                        recommendations.push({
+                            category,
+                            message,
+                            type: 'info',
+                            icon: 'fas fa-chart-line'
+                        });
+                    }
+                }
+            }
+            
+            await this.saveRecommendations(userId, recommendations);
             
             return true;
         } catch (error) {

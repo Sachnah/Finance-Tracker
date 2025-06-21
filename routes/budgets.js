@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Budget = require('../models/Budget');
+const MonthlyBudget = require('../models/MonthlyBudget');
 const Transaction = require('../models/Transaction');
 const { protect } = require('../middleware/auth');
 const BudgetRLService = require('../services/budgetRLService');
@@ -12,60 +13,70 @@ router.use(protect);
 // Get all budgets
 router.get('/', async (req, res) => {
   try {
+    let { month, year } = req.query;
     const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // JS months are 0-indexed
-    const currentYear = currentDate.getFullYear();
 
-    // Get all budgets for this user (not just current month)
-    const budgets = await Budget.find({
-      user: req.user._id
-    }).sort({ year: -1, month: -1 }); // Sort by most recent first
-    
-    // Get all transactions for this user (for any budget period)
-    const transactions = await Transaction.find({
-      user: req.user._id
+    if (!month || !year) {
+      month = currentDate.getMonth() + 1;
+      year = currentDate.getFullYear();
+    } else {
+      month = parseInt(month);
+      year = parseInt(year);
+    }
+
+    const budgets = await Budget.find({ 
+      user: req.user._id, 
+      month: month,
+      year: year
     });
-    
-    // Generate smart recommendations if there are budgets
-    let smartRecommendations = [];
-    let aggregateAdvisory = null;
-    
-    if (budgets.length > 0) {
-      // Generate smart budget recommendations using reinforcement learning
-      smartRecommendations = await BudgetRLService.generateRecommendations(
-        req.user._id,
-        budgets,
-        transactions
-      );
-      
-      // Debug: Log recommendations to verify they're being generated
-      console.log('Generated recommendations:', JSON.stringify(smartRecommendations, null, 2));
-      
-      // Generate the aggregate advisory
-      if (smartRecommendations && smartRecommendations.length > 0) {
-        // The aggregateAdvisory feature was removed as it was not implemented in the UI.
-        // aggregateAdvisory = BudgetRLService.generateAggregateAdvisory(smartRecommendations);
-        console.log('Aggregate advisory:', JSON.stringify(aggregateAdvisory, null, 2));
-      } else {
-        console.log('No recommendations generated or empty recommendations array');
-      }
-      
-      // Update the model based on past recommendations and outcomes
-      // This runs asynchronously and doesn't block the response
-      BudgetRLService.updateModelBasedOnOutcomes(req.user._id).catch(err => {
-        console.error('Error updating recommendation model:', err);
+
+    const budgetedCategories = budgets.map(b => b.category);
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+
+    let transactions = [];
+    if (budgetedCategories.length > 0) {
+      transactions = await Transaction.find({
+        user: req.user._id,
+        date: { $gte: startDate, $lte: endDate },
+        category: { $in: budgetedCategories }
       });
     }
 
+    let monthlyBudget = await MonthlyBudget.findOne({ user: req.user._id, month, year });
+    if (!monthlyBudget) {
+      monthlyBudget = { amount: 0, month, year }; // Default if not set
+    }
+
+    const totalSpent = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    const budgetsForRender = budgets.map(budget => {
+      const budgetTransactions = transactions.filter(t => t.category === budget.category);
+      const budgetObj = budget.toObject();
+      budgetObj.transactions = budgetTransactions;
+      return budgetObj;
+    });
+
+    let smartRecommendations = [];
+    if (budgets.length > 0) {
+      const allTransactions = await Transaction.find({ user: req.user._id });
+      smartRecommendations = await BudgetRLService.generateRecommendations(
+        req.user._id,
+        budgets,
+        allTransactions
+      );
+    }
+
     res.render('budgets', {
-      budgets,
-      transactions,
+      budgets: budgetsForRender,
+      totalBudget: monthlyBudget.amount,
+      totalSpent,
       smartRecommendations,
-      aggregateAdvisory,
       user: req.user,
-      currentMonth,
-      currentYear,
-      path: '/budgets' // For active sidebar highlighting
+      currentMonth: month,
+      currentYear: year,
+      path: '/budgets'
     });
   } catch (err) {
     console.error(err);
@@ -76,55 +87,102 @@ router.get('/', async (req, res) => {
 
 // POST /budgets
 // Add new budget
+// POST /budgets/monthly - Set or update the total monthly budget
+router.post('/monthly', async (req, res) => {
+  const { amount, month, year } = req.body;
+  const userId = req.user._id;
+  const parsedAmount = parseFloat(amount);
+  const parsedMonth = parseInt(month);
+  const parsedYear = parseInt(year);
+
+  try {
+    if (amount === null || amount === undefined || isNaN(parsedAmount) || parsedAmount < 0) {
+      req.flash('error_msg', 'Please provide a valid, non-negative amount.');
+      return res.redirect(`/budgets?month=${month}&year=${year}`);
+    }
+
+    // Calculate total income for the given month
+    const startDate = new Date(parsedYear, parsedMonth - 1, 1);
+    const endDate = new Date(parsedYear, parsedMonth, 0, 23, 59, 59);
+
+    const incomeTransactions = await Transaction.find({
+      user: userId,
+      type: 'income',
+      date: { $gte: startDate, $lte: endDate }
+    });
+
+    const totalIncome = incomeTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+
+    if (parsedAmount > totalIncome) {
+      req.flash('error_msg', `Budget (Rs ${parsedAmount.toLocaleString()}) cannot be set because your monthly income of Rs ${totalIncome.toLocaleString()}.`);
+      return res.redirect(`/budgets?month=${month}&year=${year}`);
+    }
+
+    await MonthlyBudget.findOneAndUpdate(
+      { user: userId, month: parsedMonth, year: parsedYear },
+      { amount: parsedAmount },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    req.flash('success_msg', 'Total monthly budget has been updated.');
+    res.redirect(`/budgets?month=${month}&year=${year}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error updating monthly budget.');
+    res.redirect(`/budgets?month=${month}&year=${year}`);
+  }
+});
+
 router.post('/', async (req, res) => {
   try {
     const { category, amount, month, year } = req.body;
     
-    // Validate inputs
-    if (!category || !amount) {
-      req.flash('error_msg', 'Please provide category and amount');
-      return res.redirect('/budgets');
+    const parsedAmount = parseFloat(amount);
+    if (!category || !parsedAmount || parsedAmount <= 0) {
+      req.flash('error_msg', 'Please provide a valid category and a positive amount.');
+      return res.redirect(`/budgets?month=${month}&year=${year}`);
     }
 
-    // Check if budget already exists for this category/month/year
-    const existingBudget = await Budget.findOne({
-      user: req.user._id,
-      category,
-      month: parseInt(month),
-      year: parseInt(year)
-    });
+    // Check against total monthly budget
+    const monthlyBudget = await MonthlyBudget.findOne({ user: req.user._id, month, year });
+    if (!monthlyBudget || monthlyBudget.amount === 0) {
+      req.flash('error_msg', 'Please set a total monthly budget before adding category budgets.');
+      return res.redirect(`/budgets?month=${month}&year=${year}`);
+    }
+
+    const categoryBudgets = await Budget.find({ user: req.user._id, month, year });
+    const existingBudget = categoryBudgets.find(b => b.category === category);
+
+    const currentCategoryTotal = categoryBudgets
+      .filter(b => b.category !== category) // Exclude the budget we are updating
+      .reduce((sum, b) => sum + b.amount, 0);
+
+    if (currentCategoryTotal + parsedAmount > monthlyBudget.amount) {
+      const remaining = monthlyBudget.amount - currentCategoryTotal;
+      req.flash('error_msg', `Budget exceeds monthly limit. You only have ₹${remaining.toFixed(2)} remaining.`);
+      return res.redirect(`/budgets?month=${month}&year=${year}`);
+    }
 
     if (existingBudget) {
-      // Update existing budget
-      existingBudget.amount = parseFloat(amount);
+      existingBudget.amount = parsedAmount;
       await existingBudget.save();
-      
-      // Update recommendations in real-time after budget update
-      BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
-        console.error('Error updating recommendations:', err);
-      });
-      
       req.flash('success_msg', 'Budget updated');
     } else {
-      // Create new budget
-      const newBudget = new Budget({
+      await Budget.create({
         user: req.user._id,
         category,
-        amount: parseFloat(amount),
+        amount: parsedAmount,
         month: parseInt(month),
         year: parseInt(year)
       });
-      await newBudget.save();
-      
-      // Update recommendations in real-time after new budget
-      BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
-        console.error('Error updating recommendations:', err);
-      });
-      
       req.flash('success_msg', 'Budget added');
     }
+
+    BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+      console.error('Error updating recommendations:', err);
+    });
     
-    res.redirect('/budgets');
+    res.redirect(`/budgets?month=${month}&year=${year}`);
   } catch (err) {
     console.error(err);
     req.flash('error_msg', 'Error adding budget');
@@ -133,6 +191,67 @@ router.post('/', async (req, res) => {
 });
 
 
+
+// PUT /budgets/:id
+// Update budget amount
+router.put('/:id', async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const parsedAmount = parseFloat(amount);
+
+    const budgetToUpdate = await Budget.findById(req.params.id);
+
+    if (!budgetToUpdate || budgetToUpdate.user.toString() !== req.user._id.toString()) {
+      req.flash('error_msg', 'Budget not found or unauthorized.');
+      return res.redirect('/budgets');
+    }
+
+    const { month, year, category } = budgetToUpdate;
+
+    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
+      req.flash('error_msg', 'Please provide a valid positive amount.');
+      return res.redirect(`/budgets?month=${month}&year=${year}`);
+    }
+
+    const monthlyBudget = await MonthlyBudget.findOne({ user: req.user._id, month, year });
+    if (!monthlyBudget) {
+        req.flash('error_msg', 'Total monthly budget not set for this period.');
+        return res.redirect(`/budgets?month=${month}&year=${year}`);
+    }
+
+    const categoryBudgets = await Budget.find({ user: req.user._id, month, year });
+    const otherCategoriesTotal = categoryBudgets
+        .filter(b => b.category !== category)
+        .reduce((sum, b) => sum + b.amount, 0);
+
+    if (otherCategoriesTotal + parsedAmount > monthlyBudget.amount) {
+        const remaining = monthlyBudget.amount - otherCategoriesTotal;
+        req.flash('error_msg', `Update failed. Exceeds monthly limit. You can only allocate up to ₹${remaining.toFixed(2)} for this category.`);
+        return res.redirect(`/budgets?month=${month}&year=${year}`);
+    }
+
+    budgetToUpdate.amount = parsedAmount;
+    await budgetToUpdate.save();
+
+    BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
+      console.error('Error updating recommendations:', err);
+    });
+
+    req.flash('success_msg', 'Budget limit updated successfully.');
+    res.redirect(`/budgets?month=${month}&year=${year}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error updating budget.');
+    // Attempt to redirect back to the correct page even on error
+    if (req.params.id) {
+        const budget = await Budget.findById(req.params.id).catch(() => null);
+        if (budget) {
+            return res.redirect(`/budgets?month=${budget.month}&year=${budget.year}`);
+        }
+    }
+    res.redirect('/budgets');
+  }
+});
 
 // DELETE /budgets/:id
 // Delete budget
@@ -154,7 +273,7 @@ router.delete('/:id', async (req, res) => {
     });
     
     req.flash('success_msg', 'Budget deleted');
-    res.redirect('/budgets');
+    res.redirect(`/budgets?month=${budget.month}&year=${budget.year}`);
   } catch (err) {
     console.error(err);
     req.flash('error_msg', 'Could not delete budget');

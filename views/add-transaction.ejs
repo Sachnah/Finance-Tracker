@@ -14,12 +14,6 @@
                     <div class="mb-4">
                         <label class="form-label fw-medium mb-2">Transaction Type</label>
                         <div class="d-flex" style="background-color: #f1f5f9; border-radius: 10px; padding: 4px;">
-                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
-                                <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense" checked style="display: none;" onchange="updateCategoryOptions()">
-                                <label class="form-check-label type-label" for="typeExpense" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
-                                    <i class="fas fa-arrow-down text-danger me-2"></i> Expense
-                                </label>
-                            </div>
                             
                             <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
                                 <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" style="display: none;" onchange="updateCategoryOptions()">
@@ -27,6 +21,16 @@
                                     <i class="fas fa-arrow-up text-success me-2"></i> Income
                                 </label>
                             </div>
+
+                            
+                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
+                                <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense" checked style="display: none;" onchange="updateCategoryOptions()">
+                                <label class="form-check-label type-label" for="typeExpense" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
+                                    <i class="fas fa-arrow-down text-danger me-2"></i> Expense
+                                </label>
+                            </div>
+                            
+                            
                             
                         </div>
                     </div>
@@ -35,7 +39,7 @@
                     <div class="mb-4">
                         <label for="amount" class="form-label fw-medium mb-2">Amount</label>
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text" style="background-color: #f8fafc; border-right: none;">₹</span>
+                            <span class="input-group-text" style="background-color: #f8fafc; border-right: none;">Rs</span>
                             <input type="number" class="form-control" id="amount" name="amount" step="1" required 
                                 style="border-left: none; font-size: 1.5rem; height: 60px; font-weight: 600;" >
                         </div>

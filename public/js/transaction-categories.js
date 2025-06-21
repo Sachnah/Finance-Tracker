@@ -4,6 +4,7 @@ const incomeCategories = [
     'Investment',
     'Rental Income',
     'Bonus',
+    'Borrowed',
     'Other Income'
 ];
 
