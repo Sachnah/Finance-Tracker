@@ -53,7 +53,19 @@
     </div>
 </div>
 
-<h3 class="text-center mb-4">Budgeted categories: <%= currentMonthName %>, <%= currentYear %></h3>
+<div class="d-flex justify-content-center align-items-center mb-4">
+    <h3 class="mb-0">Budgeted categories: <%= currentMonthName %>, <%= currentYear %></h3>
+    <% if (budgets.length > 0) { %>
+    <div class="dropdown ms-2">
+        <button class="btn btn-sm btn-icon" type="button" id="removeAllDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: transparent;">
+            <i class="fas fa-ellipsis-v"></i>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="removeAllDropdown">
+            <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#removeAllBudgetsModal">Remove All</a></li>
+        </ul>
+    </div>
+    <% } %>
+</div>
 
 <div class="row justify-content-center">
     <% if (budgets.length > 0) { %>
@@ -197,8 +209,8 @@
             <div style="font-size: 3rem; color: #6c757d; margin-bottom: 1rem;">
                 <i class="fas fa-calculator"></i><i class="fas fa-exclamation" style="font-size: 1.5rem; position: relative; top: -1rem; left: -0.5rem; color: #ffc107;"></i>
             </div>
-            <h4 class="mb-3">No budget was applied for this month.</h4>
-            <p class="text-muted">You can only see your old budget-limits to compare with current month.</p>
+            <h6 class="mb-3"></h6>
+            <p class="text-muted">No budget was applied for specific Category this month.</p>
         </div>
     </div>
     <% } %>
@@ -232,6 +244,29 @@
                     <button type="submit" class="btn btn-primary">Save Budget</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Remove All Budgets Confirmation Modal -->
+<div class="modal fade" id="removeAllBudgetsModal" tabindex="-1" aria-labelledby="removeAllBudgetsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removeAllBudgetsModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove all budget categories for this month? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="removeAllBudgetsForm" action="/budgets/all-by-month?_method=DELETE" method="POST" style="display: inline;">
+                    <input type="hidden" name="month" value="<%= currentMonth %>">
+                    <input type="hidden" name="year" value="<%= currentYear %>">
+                    <button type="submit" class="btn btn-danger">Remove All</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

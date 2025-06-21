@@ -37,8 +37,10 @@ router.get('/', async (req, res) => {
 
     let transactions = [];
     if (budgetedCategories.length > 0) {
+      // Transactions for budgeted categories only, to calculate spending per budget
       transactions = await Transaction.find({
         user: req.user._id,
+        type: 'expense',
         date: { $gte: startDate, $lte: endDate },
         category: { $in: budgetedCategories }
       });
@@ -49,7 +51,13 @@ router.get('/', async (req, res) => {
       monthlyBudget = { amount: 0, month, year }; // Default if not set
     }
 
-    const totalSpent = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+    // Calculate total spent from ALL expense transactions for the month
+    const allMonthlyExpenses = await Transaction.find({
+        user: req.user._id,
+        type: 'expense',
+        date: { $gte: startDate, $lte: endDate }
+    });
+    const totalSpent = allMonthlyExpenses.reduce((sum, transaction) => sum + transaction.amount, 0);
 
     const budgetsForRender = budgets.map(budget => {
       const budgetTransactions = transactions.filter(t => t.category === budget.category);
@@ -248,6 +256,36 @@ router.put('/:id', async (req, res) => {
         if (budget) {
             return res.redirect(`/budgets?month=${budget.month}&year=${budget.year}`);
         }
+    }
+    res.redirect('/budgets');
+  }
+});
+
+// DELETE /budgets/all-by-month
+// Delete all budgets for a specific month
+router.delete('/all-by-month', async (req, res) => {
+  const { month, year } = req.body;
+  try {
+    const userId = req.user._id;
+
+    if (!month || !year) {
+      req.flash('error_msg', 'Month and year are required to delete budgets.');
+      return res.redirect('/budgets');
+    }
+
+    await Budget.deleteMany({
+      user: userId,
+      month: parseInt(month),
+      year: parseInt(year)
+    });
+
+    req.flash('success_msg', 'All budgets for the selected month have been removed.');
+    res.redirect(`/budgets?month=${month}&year=${year}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Could not remove all budgets.');
+    if (month && year) {
+        return res.redirect(`/budgets?month=${month}&year=${year}`);
     }
     res.redirect('/budgets');
   }

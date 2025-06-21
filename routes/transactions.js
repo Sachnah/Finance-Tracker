@@ -16,34 +16,20 @@ router.use(protect);
 // Get all transactions
 router.get('/', async (req, res) => {
   try {
-    const { type, search, period = 'thisMonth' } = req.query;
+    const { type, search } = req.query;
     const userQuery = { user: req.user._id };
 
-    // Date filtering for analytics
+    // Month and Year for chart and list
     const now = new Date();
-    let startDate;
-    let endDate;
-    const dateFilter = {};
+    const month = parseInt(req.query.month) || now.getMonth() + 1;
+    const year = parseInt(req.query.year) || now.getFullYear();
 
-    switch (period) {
-      case 'lastMonth':
-        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
-        break;
-      case 'last7days':
-        startDate = new Date();
-        startDate.setDate(now.getDate() - 6);
-        startDate.setHours(0, 0, 0, 0);
-        endDate = new Date();
-        endDate.setHours(23, 59, 59, 999);
-        break;
-      case 'thisMonth':
-      default:
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of current month
-        break;
-    }
-    dateFilter.date = { $gte: startDate, $lte: endDate };
+    // Calculate start and end dates for the selected month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    endDate.setHours(23, 59, 59, 999); // End of the last day of the month
+
+    const dateFilter = { date: { $gte: startDate, $lte: endDate } };
 
     const analyticsTransactions = await Transaction.find({ ...userQuery, ...dateFilter });
 
@@ -97,7 +83,7 @@ router.get('/', async (req, res) => {
     }
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 8;
+    const limit = 5;
     const skip = (page - 1) * limit;
 
     const totalTransactions = await Transaction.countDocuments(listQuery);
@@ -108,19 +94,40 @@ router.get('/', async (req, res) => {
 
     const totalPages = Math.ceil(totalTransactions / limit);
 
+    // For month navigation
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const prevYear = month === 1 ? year - 1 : year;
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    const currentMonthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+
+    let expenseWarning = null;
+    if (totalExpense > totalIncome) {
+      const formattedExpense = totalExpense.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      const formattedIncome = totalIncome.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      expenseWarning = `Your expenses for ${currentMonthName} (Rs ${formattedExpense}) are higher than your income (Rs ${formattedIncome}). You may have forgotten to log some income.`;
+    }
+
     res.render('transactions', {
       transactions,
       user: req.user,
       path: '/transactions',
       type: type || 'all',
       search: search || '',
-      period,
+      month,
+      year,
+      currentMonthName,
+      prevMonth,
+      prevYear,
+      nextMonth,
+      nextYear,
       chartData,
       totalIncome,
       totalExpense,
       netAmount: totalIncome - totalExpense,
       currentPage: page,
       totalPages,
+      expenseWarning, // Pass warning message directly
     });
   } catch (err) {
     console.error(err);
@@ -230,10 +237,16 @@ router.get('/:id/edit', async (req, res) => {
       return res.redirect('/transactions');
     }
 
+    const now = new Date();
+    const month = parseInt(req.query.month) || now.getMonth() + 1;
+    const year = parseInt(req.query.year) || now.getFullYear();
+
     res.render('edit-transaction', {
       transaction,
       user: req.user,
-      period: req.query.period || 'thisMonth'
+      path: '/transactions',
+      month,
+      year
     });
   } catch (err) {
     console.error(err);
@@ -246,7 +259,7 @@ router.get('/:id/edit', async (req, res) => {
 // Update transaction
 router.put('/:id', async (req, res) => {
   try {
-    const { amount, type, category, description, date } = req.body;
+    const { amount, type, category, description, date, month, year } = req.body;
     
     const transaction = await Transaction.findOne({
       _id: req.params.id,
@@ -272,12 +285,41 @@ router.put('/:id', async (req, res) => {
     });
     
     req.flash('success_msg', 'Transaction updated');
-    const { period = 'thisMonth' } = req.body;
-    res.redirect(`/transactions?period=${period}`);
+    res.redirect(`/transactions?month=${month}&year=${year}`);
   } catch (err) {
     console.error(err);
     req.flash('error_msg', 'Error updating transaction');
     res.redirect('/transactions');
+  }
+});
+
+// DELETE /transactions/all-by-month
+// Delete all transactions for a specific month and year
+router.delete('/all-by-month', async (req, res) => {
+  try {
+    const { month, year } = req.body;
+    const userId = req.user._id;
+
+    if (!month || !year) {
+      req.flash('error_msg', 'Month and year are required.');
+      return res.status(400).redirect('back');
+    }
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    await Transaction.deleteMany({
+      user: userId,
+      date: { $gte: startDate, $lte: endDate },
+    });
+
+    req.flash('success_msg', `All transactions for ${new Date(year, month - 1).toLocaleString('default', { month: 'long' })} ${year} have been deleted.`);
+    res.redirect(`/transactions?month=${month}&year=${year}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error deleting transactions.');
+    res.redirect('back');
   }
 });
 

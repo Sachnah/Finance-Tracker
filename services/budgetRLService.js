@@ -13,6 +13,21 @@ class BudgetRLService {
     /**
      * Get or create a model for a user
      */
+    /**
+     * Format currency for better readability
+     */
+    static formatCurrency(amount) {
+        const num = parseFloat(amount);
+        if (isNaN(num)) {
+            return new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NRs', maximumFractionDigits: 0 }).format(0);
+        }
+        return new Intl.NumberFormat('en-NP', {
+            style: 'currency',
+            currency: 'NRs',
+            maximumFractionDigits: 0
+        }).format(num);
+    }
+
     static async getOrCreateModel(userId) {
         let model = await BudgetRL.findOne({ userId });
         if (!model) {
@@ -521,11 +536,39 @@ class BudgetRLService {
     }
     
     /**
+     * Save recommendations to the database
+     */
+    static async saveRecommendations(userId, recommendations) {
+        try {
+            const model = await this.getOrCreateModel(userId);
+
+            // Replace current recommendations with the new ones
+            model.recommendations = recommendations;
+
+            // Add new recommendations to history and prune old entries
+            const now = new Date();
+            const newHistory = recommendations.map(rec => ({ ...rec, date: now }));
+
+            const thirtyDaysAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
+            const recentHistory = model.recommendationHistory.filter(rec => new Date(rec.date).getTime() > thirtyDaysAgo);
+
+            model.recommendationHistory = [...recentHistory, ...newHistory];
+
+            await model.save();
+            console.log(`Recommendations saved successfully for user ${userId}.`);
+            return true;
+        } catch (error) {
+            console.error(`Error saving recommendations for user ${userId}:`, error);
+            return false;
+        }
+    }
+
+    /**
      * Real-time recommendation update when transactions or budgets change
      * This method should be called whenever a transaction or budget is added, updated, or deleted
      * Note: This uses the budget pacing algorithm, not RL
      */
-    static async updateRecommendationsRealTime(userId) {
+        static async updateRecommendationsRealTime(userId) {
         try {
             // Get current month's budgets
             const today = new Date();
@@ -563,9 +606,9 @@ class BudgetRLService {
                         
                         let message;
                         if (budgetDate < todayDate) {
-                            message = `For this past month, you spent ${formatCurrency(spent)} of your ${formatCurrency(budgetAmount)} budget.`;
+                            message = `For this past month, you spent ${BudgetRLService.formatCurrency(spent)} of your ${BudgetRLService.formatCurrency(budgetAmount)} budget.`;
                         } else {
-                            message = `You have a budget of ${formatCurrency(budgetAmount)} set for a future month.`;
+                            message = `You have a budget of ${BudgetRLService.formatCurrency(budgetAmount)} set for a future month.`;
                         }
                         
                         recommendations.push({
@@ -576,7 +619,7 @@ class BudgetRLService {
                         });
                     } else {
                         const percentageSpent = (spent / budgetAmount) * 100;
-                        const message = `You have spent ${formatCurrency(spent)} of your ${formatCurrency(budgetAmount)} budget (${percentageSpent.toFixed(2)}%).`;
+                        const message = `You have spent ${BudgetRLService.formatCurrency(spent)} of your ${BudgetRLService.formatCurrency(budgetAmount)} budget (${percentageSpent.toFixed(2)}%).`;
                         
                         recommendations.push({
                             category,
