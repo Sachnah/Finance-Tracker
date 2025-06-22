@@ -10,7 +10,7 @@
     .transaction-icon-expense { background-color: #fff5f5; }
     .fab-container {
         position: fixed;
-        top: 30px;
+        top: 160px;
         right: 30px;
         z-index: 1050;
         display: flex;
@@ -135,7 +135,7 @@
                                             <td><%= formatNepaliCurrency(transaction.amount) %></td>
                                             <td><%= transaction.description %></td>
                                             <td class="text-end pe-4">
-                                                <a href="/transactions/edit/<%= transaction._id %>" class="btn btn-sm btn-outline-primary me-2"><i class="fas fa-edit"></i></a>
+                                                <a href="/transactions/edit/<%= transaction._id %>?month=<%= month %>&year=<%= year %>" class="btn btn-sm btn-outline-primary me-2"><i class="fas fa-edit"></i></a>
                                                 <form action="/transactions/<%= transaction._id %>?_method=DELETE" method="POST" style="display: inline;">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this transaction?');"><i class="fas fa-trash"></i></button>
                                                 </form>

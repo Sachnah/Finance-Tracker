@@ -223,6 +223,42 @@ router.get('/add', (req, res) => {
   });
 });
 
+// GET /transactions/edit/:id
+// Show edit transaction form
+router.get('/edit/:id', async (req, res) => {
+  try {
+    const { month, year } = req.query; // Get month and year from query params
+    const transaction = await Transaction.findOne({
+      _id: req.params.id,
+      user: req.user._id
+    });
+
+    if (!transaction) {
+      req.flash('error_msg', 'Transaction not found');
+      return res.redirect('/transactions');
+    }
+
+    // For date input, format as YYYY-MM-DD
+    const yyyy = transaction.date.getFullYear();
+    const mm = String(transaction.date.getMonth() + 1).padStart(2, '0');
+    const dd = String(transaction.date.getDate()).padStart(2, '0');
+    const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+    res.render('edit-transaction', {
+      transaction,
+      formattedDate, // Pass formatted date for the form
+      user: req.user,
+      path: '/transactions',
+      month,
+      year
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error fetching transaction for edit');
+    res.redirect('/transactions');
+  }
+});
+
 // GET /transactions/:id/edit
 // Show edit transaction form
 router.get('/:id/edit', async (req, res) => {
