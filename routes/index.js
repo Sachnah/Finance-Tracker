@@ -30,6 +30,10 @@ router.get('/dashboard', protect, async (req, res) => {
     const totalExpense = transactions
       .filter(t => t.type === 'expense')
       .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const totalSavings = transactions
+      .filter(t => t.type === 'saving')
+      .reduce((sum, t) => sum + t.amount, 0);
     
     const balance = Math.max(0, totalIncome - totalExpense);
     
@@ -93,6 +97,7 @@ router.get('/dashboard', protect, async (req, res) => {
       user: req.user,
       totalIncome,
       totalExpense,
+      totalSavings,
       balance,
       transactions: transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5),
       budgetUsage,

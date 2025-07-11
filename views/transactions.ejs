@@ -45,7 +45,8 @@
                                 <canvas id="transactionChart" style="max-height: 300px;"
                     data-labels='<%- JSON.stringify(chartData.labels) %>'
                     data-income='<%- JSON.stringify(chartData.income) %>'
-                    data-expense='<%- JSON.stringify(chartData.expense) %>'></canvas>
+                    data-expense='<%- JSON.stringify(chartData.expense) %>'
+                    data-saving='<%- JSON.stringify(chartData.saving) %>'></canvas>
             </div>
         </div>
     </div>
@@ -180,6 +181,7 @@
         const chartLabels = JSON.parse(chartElement.dataset.labels || '[]');
         const chartIncomeData = JSON.parse(chartElement.dataset.income || '[]');
         const chartExpenseData = JSON.parse(chartElement.dataset.expense || '[]');
+        const chartSavingData = JSON.parse(chartElement.dataset.saving || '[]');
 
         const ctx = document.getElementById('transactionChart').getContext('2d');
         new Chart(ctx, {
@@ -199,6 +201,13 @@
                         data: chartExpenseData,
                         backgroundColor: 'rgba(220, 53, 69, 0.7)',
                         borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Savings',
+                        data: chartSavingData,
+                        backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
                         borderWidth: 1
                     }
                 ]
