@@ -30,21 +30,33 @@ router.get('/dashboard', protect, async (req, res) => {
     const totalExpense = transactions
       .filter(t => t.type === 'expense')
       .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const totalSavings = transactions
+      .filter(t => t.type === 'saving')
+      .reduce((sum, t) => sum + t.amount, 0);
     
     const balance = Math.max(0, totalIncome - totalExpense);
-    
-    // Get current month's expenses and budgets
+
+    // Get current month's transactions, expenses, and budgets
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth(); // 0-indexed for Date object
     const currentYear = currentDate.getFullYear();
 
-    // 1. Filter for current month's expenses
-    const monthlyExpenses = transactions.filter(t => {
-      const transactionDate = new Date(t.date);
-      return t.type === 'expense' &&
-             transactionDate.getMonth() === currentMonth &&
-             transactionDate.getFullYear() === currentYear;
+    const monthlyTransactions = transactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
     });
+
+    const monthlyIncome = monthlyTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const monthlyExpense = monthlyTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    // 1. Filter for current month's expenses
+    const monthlyExpenses = monthlyTransactions.filter(t => t.type === 'expense');
 
     // 2. Group expenses by category
     const expensesByCategory = {};
@@ -91,13 +103,10 @@ router.get('/dashboard', protect, async (req, res) => {
 
     res.render('dashboard', {
       user: req.user,
-      totalIncome,
-      totalExpense,
-      balance,
       transactions: transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5),
       budgetUsage,
-      totalMonthlyBudget,
-      totalMonthlySpent,
+      monthlyIncome,
+      monthlyExpense,
       path: '/dashboard' // For active sidebar highlighting
     });
   } catch (err) {

@@ -36,6 +36,7 @@ router.get('/', async (req, res) => {
     // Process data for chart
     let totalIncome = 0;
     let totalExpense = 0;
+    let totalSavings = 0;
 
     // Create a map of all days in the period to ensure the chart shows empty days
     const dayMap = new Map();
@@ -43,7 +44,7 @@ router.get('/', async (req, res) => {
     iterDate.setHours(0, 0, 0, 0);
 
     while (iterDate <= endDate) {
-        dayMap.set(iterDate.toISOString().split('T')[0], { income: 0, expense: 0 });
+        dayMap.set(iterDate.toISOString().split('T')[0], { income: 0, expense: 0, saving: 0 });
         iterDate.setDate(iterDate.getDate() + 1);
     }
     
@@ -53,9 +54,12 @@ router.get('/', async (req, res) => {
         if (t.type === 'income') {
           dayMap.get(dateStr).income += t.amount;
           totalIncome += t.amount;
-        } else {
+        } else if (t.type === 'expense') {
           dayMap.get(dateStr).expense += t.amount;
           totalExpense += t.amount;
+        } else if (t.type === 'saving') {
+          dayMap.get(dateStr).saving += t.amount;
+          totalSavings += t.amount;
         }
       }
     });
@@ -70,6 +74,7 @@ router.get('/', async (req, res) => {
       }),
       income: sortedDates.map(d => dayMap.get(d).income),
       expense: sortedDates.map(d => dayMap.get(d).expense),
+      saving: sortedDates.map(d => dayMap.get(d).saving),
     };
 
     // Filter for transaction list (shows all transactions, not just from the period)
@@ -124,6 +129,7 @@ router.get('/', async (req, res) => {
       chartData,
       totalIncome,
       totalExpense,
+      totalSavings,
       netAmount: totalIncome - totalExpense,
       currentPage: page,
       totalPages,
