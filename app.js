@@ -90,7 +90,10 @@ app.use('/', require('./routes/index'));
 app.use('/users', require('./routes/auth'));
 app.use('/transactions', require('./routes/transactions'));
 app.use('/budgets', require('./routes/budgets'));
-app.use('/savings', require('./routes/savings'));
+
+// Start the recurring transaction scheduler
+const recurringTransactionService = require('./services/recurringTransactionService');
+recurringTransactionService.start();
 
 const PORT = process.env.PORT || 3000;
 

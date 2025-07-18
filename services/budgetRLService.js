@@ -142,11 +142,11 @@ class BudgetRLService {
             message = `You have spent the entire budget for the ${category} category. Be careful with any further spending.`;
           } else if (remaining < 0) {
             // Already overspent
-            message = `You've already spent ${formatCurrency(spent)} of your ${category} budget. You've exceeded your limit. STOP spending.`;
+            message = `You've exceeded your limit of your ${category} budget. STOP spending.`;
           } else {
             // Projected to overspend
             const overBudgetAmount = projectedSpending - budgetAmount;
-            message = `You've spent ${formatCurrency(spent)} of your ${category} budget. At this pace, you are projected to go over budget by ${formatCurrency(overBudgetAmount)}.`;
+            message = `You've spent ${formatCurrency(spent)}. At this pace, you are projected to go over budget by ${formatCurrency(overBudgetAmount)}.`;
           }
         }
         // Caution - On track but close to limit (90%-100% of budget used)
@@ -166,7 +166,7 @@ class BudgetRLService {
         else {
           type = 'info';
           
-          message = `You've used ${formatCurrency(spent)} of your ${category} budget with ${daysLeft} days remaining. You're on track.`;
+          message = `You've used ${formatCurrency(spent)}, with ${daysLeft} days remaining. You're on track.`;
         }
         
         return { message, type };
@@ -597,7 +597,7 @@ class BudgetRLService {
                         icon: 'fas fa-info-circle'
                     });
                 } else {
-                    const spent = budgetTransactions.reduce((sum, t) => sum + t.amount, 0);
+                    const spent = (budgetTransactions || []).reduce((sum, t) => sum + t.amount, 0);
                     const remaining = budgetAmount - spent;
                     
                     if (budgetYear !== currentYear || budgetMonth !== currentMonth) {

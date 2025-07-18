@@ -6,75 +6,75 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         margin-bottom: 1.5rem;
     }
-
+    .progress-container .progress {
+        height: 10px;
+    }
 </style>
 
 
 
 <div class="row">
     <div class="col-12">
-        <h1 style="font-weight: 800; font-size: 2.5rem; color: #4F46E5; margin-bottom: 1rem;">Welcome back, <%= user.name %></h1>
+        <h1 style="font-weight: 800; font-size: 2.5rem; color: #4F46E5; margin-bottom: 1rem;">Welcome, <%= user.name %></h1>
     </div>
 </div>
 
-<!-- Financial Summary Cards -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="dashboard-card text-center">
-            <h6 class="text-muted">Total Income</h6>
-            <h3 class="fw-bold text-success">Rs <%= formatNepaliCurrency(totalIncome) %></h3>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="dashboard-card text-center">
-            <h6 class="text-muted">Total Expense</h6>
-            <h3 class="fw-bold text-danger">Rs <%= formatNepaliCurrency(totalExpense) %></h3>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="dashboard-card text-center">
-            <div class="d-flex justify-content-center align-items-center">
-                <h6 class="text-muted mb-0 me-2">Total Savings</h6>
-                <button class="btn btn-xs btn-primary" data-bs-toggle="modal" data-bs-target="#addSavingsModal" style="padding: 0.1rem 0.4rem; font-size: 0.7rem;">+</button>
-            </div>
-            <h3 class="fw-bold text-primary">Rs <%= formatNepaliCurrency(totalSavings) %></h3>
-        </div>
-    </div>
-</div>
-
-<!-- Add Savings Modal -->
-<div class="modal fade" id="addSavingsModal" tabindex="-1" aria-labelledby="addSavingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addSavingsModalLabel">Contribute to Savings</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form action="/savings/contribute" method="POST">
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="savingsAmount" class="form-label">Amount (Rs)</label>
-            <input type="number" class="form-control" id="savingsAmount" name="amount" required min="1">
-          </div>
-          <div class="mb-3">
-            <label for="savingsDescription" class="form-label">Description (Optional)</label>
-            <input type="text" class="form-control" id="savingsDescription" name="description" placeholder="e.g., Monthly savings">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
 
 
+
+<!-- Row 1: Income vs. Expense Trend -->
 <div class="row">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <h5 class="mb-3">Income vs. Expense Trend (Last 2 Months)</h5>
+            <div style="position: relative; height: 340px;">
+                <canvas id="incomeExpenseTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Breakdowns -->
+<div class="row mt-4">
+    <!-- Monthly Expense Breakdown -->
+    <div class="col-lg-6">
+        <div class="dashboard-card">
+            <h5 class="mb-3">Monthly Expense Breakdown</h5>
+            <div style="position: relative; height: 340px;">
+                <canvas id="expenseBreakdownChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Income Source Breakdown -->
+    <div class="col-lg-6">
+        <div class="dashboard-card">
+            <h5 class="mb-3">Income Source Breakdown</h5>
+            <div style="position: relative; height: 340px;">
+                <canvas id="incomeBreakdownChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Row 3: Budget vs Spending -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <h5 class="mb-3">Budget vs. Spending Analysis</h5>
+            <div style="position: relative; height: 340px;">
+                <canvas id="budgetSpendingChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 4: Recent Transactions & Recurring Breakdown -->
+<div class="row mt-4">
     <!-- Recent Transactions -->
-    <div class="col-lg-8">
+    <div class="col-lg-6">
         <div class="dashboard-card h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5>Recent Transactions</h5>
@@ -99,27 +99,17 @@
             </ul>
         </div>
     </div>
-
-    <!-- Financial Wellness Tips -->
-    <div class="col-lg-4">
+    <!-- Recurring Transactions Breakdown -->
+    <div class="col-lg-6">
         <div class="dashboard-card h-100">
-            <h5 class="mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Financial Wellness Tips</h5>
-            <div id="financial-tip"></div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <!-- Monthly Expense Breakdown -->
-    <div class="col-12">
-        <div class="dashboard-card">
-            <h5 class="mb-3">Monthly Expense Breakdown</h5>
-            <div style="height: 340px;">
-                <canvas id="expenseBreakdownChart"></canvas>
+            <h5 class="mb-3">Recurring Transactions Breakdown</h5>
+            <div style="position: relative; height: 340px;">
+                <canvas id="recurringTransactionsChart"></canvas>
             </div>
         </div>
     </div>
 </div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -131,51 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.formatNepaliCurrency = function(num) { return 'Rs' + (num ? num.toFixed(2) : '0.00'); };
     }
 
-    const tips = [
-        {
-            icon: 'fas fa-piggy-bank',
-            text: '<strong>Automate Your Savings:</strong> Set up automatic transfers to your savings account each payday. Even small amounts add up!'
-        },
-        {
-            icon: 'fas fa-file-invoice-dollar',
-            text: '<strong>Review Subscriptions:</strong> Take a look at your monthly subscriptions. Cancel any you no longer use to free up cash.'
-        },
-        {
-            icon: 'fas fa-chart-pie',
-            text: '<strong>The 50/30/20 Rule:</strong> A simple budgeting guideline: 50% of your income for needs, 30% for wants, and 20% for savings.'
-        },
-        {
-            icon: 'fas fa-shield-alt',
-            text: '<strong>Emergency Fund:</strong> Build an emergency fund that covers 3-6 months of living expenses for unexpected events.'
-        },
-        {
-            icon: 'fas fa-search-dollar',
-            text: '<strong>Track Your Spending:</strong> Knowing where your money goes is the first step to taking control of your finances.'
-        }
-    ];
-
-    const tipElement = document.getElementById('financial-tip');
-
-    function displayAllTips() {
-        if (!tipElement) return;
-        let tipsHtml = '<ul class="list-unstyled mb-0">';
-        tips.forEach(tip => {
-            tipsHtml += `
-                <li class="d-flex align-items-start mb-3">
-                    <i class="${tip.icon} fa-lg me-3 text-primary mt-1"></i>
-                    <p class="mb-0">${tip.text}</p>
-                </li>
-            `;
-        });
-        tipsHtml += '</ul>';
-        tipElement.innerHTML = tipsHtml;
-    }
-
-    if (tipElement) {
-        displayAllTips();
-    }
-
-        const expenseDataJSON = `<%- JSON.stringify(budgetUsage) %>`;
+    const expenseDataJSON = `<%- JSON.stringify(budgetUsage) %>`;
     try {
         const expenseData = JSON.parse(expenseDataJSON);
         const labels = Object.keys(expenseData);
@@ -234,7 +180,240 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Income vs Expense Trend Chart
+    const trendData = <%- JSON.stringify(trendData) %>;
+    const trendCtx = document.getElementById('incomeExpenseTrendChart');
+    if (trendCtx) {
+      new Chart(trendCtx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: trendData.labels,
+          datasets: [
+            {
+              label: 'Income',
+              data: trendData.income,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Expense',
+              data: trendData.expense,
+              borderColor: 'rgba(255, 99, 132, 1)',
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return formatNepaliCurrency(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.parsed.y !== null) {
+                    label += formatNepaliCurrency(context.parsed.y);
+                  }
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
+    // Budget vs Spending Chart
+    const budgetSpendingCtx = document.getElementById('budgetSpendingChart');
+    const budgetUsageData = <%- JSON.stringify(budgetUsage) %>;
+
+    if (budgetSpendingCtx && Object.keys(budgetUsageData).length > 0) {
+      const budgetLabels = Object.keys(budgetUsageData);
+      const budgetData = Object.values(budgetUsageData).map(d => d.budget);
+      const spentData = Object.values(budgetUsageData).map(d => d.spent);
+
+      new Chart(budgetSpendingCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: budgetLabels,
+          datasets: [
+            {
+              label: 'Budget',
+              data: budgetData,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Spent',
+              data: spentData,
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return formatNepaliCurrency(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.parsed.y !== null) {
+                    label += formatNepaliCurrency(context.parsed.y);
+                  }
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Recurring Transactions Chart
+    const recurringData = <%- JSON.stringify(recurringByCategory) %>;
+    const recurringCtx = document.getElementById('recurringTransactionsChart');
+    if (recurringCtx && Object.keys(recurringData).length > 0) {
+        const recurringLabels = Object.keys(recurringData);
+        const recurringValues = Object.values(recurringData);
+
+        new Chart(recurringCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: recurringLabels,
+                datasets: [{
+                    label: 'Recurring Transactions',
+                    data: recurringValues,
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF',
+                        '#FF9F40'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += formatNepaliCurrency(context.parsed);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } else if (recurringCtx) {
+        const parent = recurringCtx.parentElement;
+        parent.innerHTML = '<div class="text-center text-muted d-flex align-items-center justify-content-center h-100"><p>No recurring transactions found.</p></div>';
+    }
+
+    // Income Source Breakdown Chart
+    const incomeData = <%- JSON.stringify(incomeByCategory) %>;
+    const incomeCtx = document.getElementById('incomeBreakdownChart');
+    if (incomeCtx && Object.keys(incomeData).length > 0) {
+      const incomeLabels = Object.keys(incomeData);
+      const incomeValues = Object.values(incomeData);
+
+      if (incomeLabels.length > 0) {
+        new Chart(incomeCtx.getContext('2d'), {
+          type: 'doughnut',
+          data: {
+            labels: incomeLabels,
+            datasets: [{
+              label: 'Income',
+              data: incomeValues,
+              backgroundColor: [
+                '#1cc88a',
+                '#36b9cc',
+                '#4e73df',
+                '#f6c23e',
+                '#e74a3b',
+                '#858796'
+              ],
+              borderColor: '#fff',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    let label = context.label || '';
+                    if (label) {
+                      label += ': ';
+                    }
+                    if (context.parsed !== null) {
+                      label += formatNepaliCurrency(context.parsed);
+                    }
+                    return label;
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else {
+        const parent = incomeCtx.parentElement;
+        parent.innerHTML = '<div class="text-center text-muted d-flex align-items-center justify-content-center h-100"><p>No income data for this month.</p></div>';
+      }
+    }
 });
 </script>
 

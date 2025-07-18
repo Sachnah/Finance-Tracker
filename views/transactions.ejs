@@ -103,6 +103,7 @@
                                     <option value="">All Types</option>
                                     <option value="income" <%= (typeof type !== 'undefined' && type === 'income') ? 'selected' : '' %>>Income</option>
                                     <option value="expense" <%= (typeof type !== 'undefined' && type === 'expense') ? 'selected' : '' %>>Expense</option>
+                                    <option value="recurring" <%= (typeof type !== 'undefined' && type === 'recurring') ? 'selected' : '' %>>Recurring</option>
                                 </select>
                             </div>
                         </form>
@@ -115,7 +116,7 @@
                                 <thead style="background-color: #f8f9fa;">
                                     <tr>
                                         <th scope="col" class="ps-4">Date</th>
-                                        <th scope="col">Type</th>
+                                        <th scope="col">Recurring</th>
                                         <th scope="col">Category</th>
                                         <th scope="col">Amount</th>
                                         <th scope="col">Description</th>
@@ -127,9 +128,11 @@
                                         <tr>
                                             <td class="ps-4"><%= new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
                                             <td>
-                                                <span class="badge bg-<%= transaction.type === 'income' ? 'success' : 'danger' %>-soft text-<%= transaction.type === 'income' ? 'success' : 'danger' %>">
-                                                    <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
-                                                </span>
+                                                <% if (transaction.isRecurring) { %>
+                                                    <span class="badge rounded-pill bg-primary-light text-primary">Recurring</span>
+                                                <% } else { %>
+                                                    <span class="badge rounded-pill bg-secondary-light text-secondary">One-time</span>
+                                                <% } %>
                                             </td>
                                             <td><%= transaction.category %></td>
                                             <td><%= formatNepaliCurrency(transaction.amount) %></td>

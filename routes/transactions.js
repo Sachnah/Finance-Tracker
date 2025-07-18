@@ -36,7 +36,6 @@ router.get('/', async (req, res) => {
     // Process data for chart
     let totalIncome = 0;
     let totalExpense = 0;
-    let totalSavings = 0;
 
     // Create a map of all days in the period to ensure the chart shows empty days
     const dayMap = new Map();
@@ -44,7 +43,7 @@ router.get('/', async (req, res) => {
     iterDate.setHours(0, 0, 0, 0);
 
     while (iterDate <= endDate) {
-        dayMap.set(iterDate.toISOString().split('T')[0], { income: 0, expense: 0, saving: 0 });
+        dayMap.set(iterDate.toISOString().split('T')[0], { income: 0, expense: 0 });
         iterDate.setDate(iterDate.getDate() + 1);
     }
     
@@ -57,9 +56,6 @@ router.get('/', async (req, res) => {
         } else if (t.type === 'expense') {
           dayMap.get(dateStr).expense += t.amount;
           totalExpense += t.amount;
-        } else if (t.type === 'saving') {
-          dayMap.get(dateStr).saving += t.amount;
-          totalSavings += t.amount;
         }
       }
     });
@@ -67,19 +63,24 @@ router.get('/', async (req, res) => {
     const sortedDates = Array.from(dayMap.keys()).sort();
     
     const chartData = {
-      labels: sortedDates.map(d => {
+      labels: sortedDates.map((d) => {
         const [year, month, day] = d.split('-').map(Number);
         const date = new Date(Date.UTC(year, month - 1, day));
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
       }),
       income: sortedDates.map(d => dayMap.get(d).income),
       expense: sortedDates.map(d => dayMap.get(d).expense),
-      saving: sortedDates.map(d => dayMap.get(d).saving),
     };
 
     // Filter for transaction list (shows all transactions, not just from the period)
     const listQuery = { ...userQuery };
-    if (type && type !== 'all') listQuery.type = type;
+    if (type && type !== 'all') {
+      if (type === 'recurring') {
+        listQuery.isRecurring = true;
+      } else {
+        listQuery.type = type;
+      }
+    }
     if (search) {
       listQuery.$or = [
         { category: { $regex: search, $options: 'i' } },
@@ -129,7 +130,6 @@ router.get('/', async (req, res) => {
       chartData,
       totalIncome,
       totalExpense,
-      totalSavings,
       netAmount: totalIncome - totalExpense,
       currentPage: page,
       totalPages,
@@ -146,28 +146,55 @@ router.get('/', async (req, res) => {
 // Add new transaction
 router.post('/', async (req, res) => {
   try {
-    let { amount, type, category, description, date } = req.body;
+    let { amount, type, category, description, date, isRecurring, recurringInterval } = req.body;
     
     // Validate inputs
     if (!amount || !type) {
       req.flash('error_msg', 'Please provide amount and type');
-      return res.redirect('/transactions');
+      return res.redirect('/transactions/add'); // Redirect back to form
     }
 
-    // If category is not provided by the user, auto-categorize it
-    if (!category) {
-        category = categorizeTransaction(description);
+    // Auto-categorize if category is not provided or 'Uncategorized'
+    if (!category || category === 'Uncategorized') {
+      try {
+        category = await categorizeTransaction(description);
+      } catch (error) {
+        console.error('Categorization failed:', error.message);
+        category = 'Uncategorized'; // Fallback category
+      }
+    }
+    
+    const transactionData = {
+        user: req.user._id,
+        amount,
+        type,
+        category,
+        description,
+        date: date ? new Date(date) : new Date(),
+        isRecurring: isRecurring === 'on', // Checkbox value is 'on'
+    };
+
+    if (transactionData.isRecurring) {
+        transactionData.recurringInterval = recurringInterval;
+        
+        const currentDate = new Date(transactionData.date);
+        let nextDate = new Date(currentDate);
+
+        switch (recurringInterval) {
+            case 'daily':
+                nextDate.setDate(currentDate.getDate() + 1);
+                break;
+            case 'weekly':
+                nextDate.setDate(currentDate.getDate() + 7);
+                break;
+            case 'monthly':
+                nextDate.setMonth(currentDate.getMonth() + 1);
+                break;
+        }
+        transactionData.nextRecurringDate = nextDate;
     }
 
-    const newTransaction = new Transaction({
-      user: req.user._id,
-      amount: parseFloat(amount),
-      type,
-      category,
-      description,
-      date: date || Date.now()
-    });
-
+    const newTransaction = new Transaction(transactionData);
     await newTransaction.save();
     
     // Update recommendations in real-time

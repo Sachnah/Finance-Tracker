@@ -25,6 +25,19 @@ const TransactionSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now
+  },
+  isRecurring: {
+    type: Boolean,
+    default: false
+  },
+  recurringInterval: {
+    type: String,
+    enum: ['daily', 'weekly', 'monthly'],
+    default: null
+  },
+  nextRecurringDate: {
+    type: Date,
+    default: null
   }
 });
 

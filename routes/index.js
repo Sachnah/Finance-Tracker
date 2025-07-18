@@ -22,41 +22,20 @@ router.get('/dashboard', protect, async (req, res) => {
     // Get all transactions for this user
     const transactions = await Transaction.find({ user: req.user._id });
     
-    // Calculate totals
-    const totalIncome = transactions
-      .filter(t => t.type === 'income')
-      .reduce((sum, tx) => sum + tx.amount, 0);
-    
-    const totalExpense = transactions
-      .filter(t => t.type === 'expense')
-      .reduce((sum, tx) => sum + tx.amount, 0);
 
-    const totalSavings = transactions
-      .filter(t => t.type === 'saving')
-      .reduce((sum, t) => sum + t.amount, 0);
-    
-    const balance = Math.max(0, totalIncome - totalExpense);
 
-    // Get current month's transactions, expenses, and budgets
+    // Get current month's expenses and budgets
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth(); // 0-indexed for Date object
     const currentYear = currentDate.getFullYear();
 
-    const monthlyTransactions = transactions.filter(t => {
-        const transactionDate = new Date(t.date);
-        return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
-    });
-
-    const monthlyIncome = monthlyTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + t.amount, 0);
-
-    const monthlyExpense = monthlyTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0);
-
     // 1. Filter for current month's expenses
-    const monthlyExpenses = monthlyTransactions.filter(t => t.type === 'expense');
+    const monthlyExpenses = transactions.filter(t => {
+      const transactionDate = new Date(t.date);
+      return t.type === 'expense' &&
+             transactionDate.getMonth() === currentMonth &&
+             transactionDate.getFullYear() === currentYear;
+    });
 
     // 2. Group expenses by category
     const expensesByCategory = {};
@@ -101,12 +80,90 @@ router.get('/dashboard', protect, async (req, res) => {
       .filter(b => b.budget > 0) // Only consider spending in categories with a budget
       .reduce((sum, b) => sum + b.spent, 0);
 
+    // --- Data for Income Source Breakdown Chart ---
+    const monthlyIncomes = transactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        return t.type === 'income' &&
+               transactionDate.getMonth() === currentMonth &&
+               transactionDate.getFullYear() === currentYear;
+    });
+
+    const incomeByCategory = {};
+    monthlyIncomes.forEach(transaction => {
+        if (!incomeByCategory[transaction.category]) {
+            incomeByCategory[transaction.category] = 0;
+        }
+        incomeByCategory[transaction.category] += transaction.amount;
+    });
+
+    // 2-month income vs expense trend data
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    const monthlyData = await Transaction.aggregate([
+      { $match: {
+        user: req.user._id,
+        date: { $gte: twoMonthsAgo }
+      } },
+      {
+        $group: {
+          _id: { year: { $year: "$date" }, month: { $month: "$date" } },
+          totalIncome: { $sum: { $cond: [{ $eq: ["$type", "income"] }, "$amount", 0] } },
+          totalExpense: { $sum: { $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0] } },
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const trendData = {
+      labels: [],
+      income: [],
+      expense: []
+    };
+
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    // Initialize with last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthName = monthNames[d.getMonth()];
+      const year = d.getFullYear().toString().slice(-2);
+      trendData.labels.push(`${monthName} '${year}`);
+      trendData.income.push(0);
+      trendData.expense.push(0);
+    }
+    
+    monthlyData.forEach(item => {
+      const monthName = monthNames[item._id.month - 1];
+      const year = item._id.year.toString().slice(-2);
+      const label = `${monthName} '${year}`;
+      const index = trendData.labels.indexOf(label);
+      if (index !== -1) {
+        trendData.income[index] = item.totalIncome;
+        trendData.expense[index] = item.totalExpense;
+      }
+    });
+
+    // --- Data for Recurring Transactions Chart ---
+    const recurringTransactions = transactions.filter(t => t.isRecurring);
+    const recurringByCategory = {};
+    recurringTransactions.forEach(transaction => {
+        if (!recurringByCategory[transaction.category]) {
+            recurringByCategory[transaction.category] = 0;
+        }
+        recurringByCategory[transaction.category] += transaction.amount;
+    });
+
     res.render('dashboard', {
       user: req.user,
       transactions: transactions.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5),
       budgetUsage,
-      monthlyIncome,
-      monthlyExpense,
+      trendData,
+      totalMonthlyBudget,
+      totalMonthlySpent,
+      incomeByCategory,
+      recurringByCategory, // Pass recurring data to the view
       path: '/dashboard' // For active sidebar highlighting
     });
   } catch (err) {

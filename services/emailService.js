@@ -18,7 +18,7 @@ const sendBudgetAlertEmail = async (userEmail, userName, category, percentageSpe
         <h2>Hi ${userName},</h2>
         <p>This is an alert to let you know that you have spent <strong>${percentageSpent}%</strong> of your budget for the <strong>${category}</strong> category this month.</p>
         <p>You might want to review your recent transactions to stay on track.</p>
-        <p>Best regards,<br>Bibek, Sachana, U</p>
+        <p>Best regards,<br>Bibek, Sachana, Ushmita</p>
       </div>
     `,
   };

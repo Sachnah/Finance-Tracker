@@ -43,14 +43,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4 col-lg-4">
-        <div class="card h-50">
-            <div class="card-body">
-                <h5 class="card-title">Total Spent</h5>
-                <p class="card-text fs-4">Rs <%= formatNepaleseCurrency(totalSpent) %></p>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <div class="d-flex justify-content-center align-items-center mb-4">
@@ -108,6 +101,14 @@
                 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
                 const recommendation = smartRecommendations.find(r => r.category && budget.category && r.category.toLowerCase() === budget.category.toLowerCase()) || { message: 'No specific recommendation available.', type: 'info', icon: 'fas fa-info-circle' };
+
+                const recommendationTypeMap = {
+                    'info': 'alert-info',
+                    'warning': 'alert-warning',
+                    'success': 'alert-success',
+                    'danger': 'alert-danger'
+                };
+                const recommendationClass = recommendationTypeMap[recommendation.type] || 'alert-secondary';
             %>
 
             <div class="col-md-6 col-lg-5 mb-4 d-flex align-items-stretch">
@@ -165,7 +166,7 @@
                             <i class="fas fa-chevron-down"></i>
                         </a>
                         <div class="collapse mt-2" id="collapse-<%= budget._id %>">
-                            <div class="alert alert-<%= recommendation.type %> d-flex align-items-center mb-0" role="alert">
+                            <div class="alert <%= recommendationClass %> d-flex align-items-center mb-0" role="alert">
                                 <i class="fas <%= recommendation.icon %> me-2"></i>
                                 <div><%= recommendation.message %></div>
                             </div>
