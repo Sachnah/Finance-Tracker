@@ -8,6 +8,7 @@ const path = require('path');
 const BudgetRLService = require('../services/budgetRLService');
 const { categorizeTransaction } = require('../services/categorizationService');
 const { sendBudgetAlertEmail } = require('../services/emailService');
+const { processRecurringTransactions, calculateNextDate } = require('../services/recurringTransactionService');
 
 // Protect all routes
 router.use(protect);
@@ -196,6 +197,11 @@ router.post('/', async (req, res) => {
 
     const newTransaction = new Transaction(transactionData);
     await newTransaction.save();
+
+    // If the new transaction is a recurring template, run the processor immediately to catch up
+    if (newTransaction.isRecurring) {
+      processRecurringTransactions().catch(err => console.error('Error processing recurring transactions on-demand:', err));
+    }
     
     // Update recommendations in real-time
     BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
@@ -233,7 +239,7 @@ router.post('/', async (req, res) => {
           req.flash('warning_msg', `Warning: You've spent ${percentageSpent}% of your ${category} budget`);
           
           // Send email alert
-          sendBudgetAlertEmail(req.user.email, req.user.name, category, percentageSpent);
+          sendBudgetAlertEmail(req.user.email, req.user.name, category, totalSpent, budget.amount);
         }
       }
     }
@@ -328,8 +334,8 @@ router.get('/:id/edit', async (req, res) => {
 // Update transaction
 router.put('/:id', async (req, res) => {
   try {
-    const { amount, type, category, description, date, month, year } = req.body;
-    
+    const { type, amount, category, description, date, month, year, isRecurring, recurringInterval } = req.body;
+
     const transaction = await Transaction.findOne({
       _id: req.params.id,
       user: req.user._id
@@ -337,14 +343,34 @@ router.put('/:id', async (req, res) => {
 
     if (!transaction) {
       req.flash('error_msg', 'Transaction not found');
-      return res.redirect('/transactions');
+      return res.redirect(`/transactions?month=${month}&year=${year}`);
     }
 
-    transaction.amount = parseFloat(amount);
     transaction.type = type;
+    transaction.amount = amount;
     transaction.category = category;
     transaction.description = description;
-    transaction.date = date || transaction.date;
+    transaction.date = new Date(date);
+
+    // Handle recurring settings
+    transaction.isRecurring = isRecurring === 'on';
+    if (transaction.isRecurring) {
+      transaction.recurringInterval = recurringInterval;
+      // If it's a newly recurring transaction, set the next date
+      if (!transaction.nextRecurringDate) {
+        transaction.nextRecurringDate = calculateNextDate(transaction.date, recurringInterval);
+      }
+    } else {
+      transaction.recurringInterval = undefined;
+      transaction.nextRecurringDate = undefined;
+    }
+
+    await transaction.save();
+
+    // If the transaction is now recurring, run the processor to catch up
+    if (transaction.isRecurring) {
+      processRecurringTransactions().catch(err => console.error('Error processing recurring transactions on-demand:', err));
+    }
 
     await transaction.save();
     

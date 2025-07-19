@@ -5,6 +5,7 @@ const MonthlyBudget = require('../models/MonthlyBudget');
 const Transaction = require('../models/Transaction');
 const { protect } = require('../middleware/auth');
 const BudgetRLService = require('../services/budgetRLService');
+const { sendBudgetAlertEmail } = require('../services/emailService');
 
 // Protect all routes
 router.use(protect);
@@ -171,12 +172,13 @@ router.post('/', async (req, res) => {
       return res.redirect(`/budgets?month=${month}&year=${year}`);
     }
 
+    let savedBudget;
     if (existingBudget) {
       existingBudget.amount = parsedAmount;
-      await existingBudget.save();
+      savedBudget = await existingBudget.save();
       req.flash('success_msg', 'Budget updated');
     } else {
-      await Budget.create({
+      savedBudget = await Budget.create({
         user: req.user._id,
         category,
         amount: parsedAmount,
@@ -184,6 +186,23 @@ router.post('/', async (req, res) => {
         year: parseInt(year)
       });
       req.flash('success_msg', 'Budget added');
+    }
+
+    // Check if the new budget is already exceeded
+    const startDate = new Date(savedBudget.year, savedBudget.month - 1, 1);
+    const endDate = new Date(savedBudget.year, savedBudget.month, 0, 23, 59, 59);
+
+    const monthTransactions = await Transaction.find({
+      user: req.user._id,
+      type: 'expense',
+      category: savedBudget.category,
+      date: { $gte: startDate, $lte: endDate }
+    });
+
+    const totalSpent = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+
+    if (savedBudget.amount > 0 && totalSpent >= savedBudget.amount * 0.9) {
+      sendBudgetAlertEmail(req.user.email, req.user.name, savedBudget.category, totalSpent, savedBudget.amount);
     }
 
     BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
@@ -240,6 +259,23 @@ router.put('/:id', async (req, res) => {
 
     budgetToUpdate.amount = parsedAmount;
     await budgetToUpdate.save();
+
+    // Check if the updated budget is already exceeded
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+
+    const monthTransactions = await Transaction.find({
+      user: req.user._id,
+      type: 'expense',
+      category: category,
+      date: { $gte: startDate, $lte: endDate }
+    });
+
+    const totalSpent = monthTransactions.reduce((sum, t) => sum + t.amount, 0);
+
+    if (budgetToUpdate.amount > 0 && totalSpent >= budgetToUpdate.amount * 0.9) {
+      sendBudgetAlertEmail(req.user.email, req.user.name, category, totalSpent, budgetToUpdate.amount);
+    }
 
     BudgetRLService.updateRecommendationsRealTime(req.user._id).catch(err => {
       console.error('Error updating recommendations:', err);

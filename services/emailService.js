@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendBudgetAlertEmail = async (userEmail, userName, category, percentageSpent) => {
+const sendBudgetAlertEmail = async (userEmail, userName, category, spentAmount, budgetAmount) => {
   const mailOptions = {
     from: `"Finance Tracker" <${process.env.EMAIL_USER}>`,
     to: userEmail,
@@ -16,7 +16,7 @@ const sendBudgetAlertEmail = async (userEmail, userName, category, percentageSpe
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2>Hi ${userName},</h2>
-        <p>This is an alert to let you know that you have spent <strong>${percentageSpent}%</strong> of your budget for the <strong>${category}</strong> category this month.</p>
+                <p>This is an alert to let you know that you have spent <strong>Rs ${spentAmount.toFixed(2)}</strong> out of your <strong>Rs ${budgetAmount.toFixed(2)}</strong> budget for the <strong>${category}</strong> category this month.</p>
         <p>You might want to review your recent transactions to stay on track.</p>
         <p>Best regards,<br>Bibek, Sachana, Ushmita</p>
       </div>
