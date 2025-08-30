@@ -22,8 +22,227 @@
     }
 %>
 
+<style>
+    /* Stat card design from profile page */
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #E5E7EB;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-title {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-change {
+        font-size: 0.875rem;
+        color: #6B7280;
+    }
+    
+    .stat-change.positive {
+        color: #059669;
+    }
+    
+    .stat-change.negative {
+        color: #DC2626;
+    }
+    
+    /* Action button styling */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    .action-buttons .btn-outline-primary {
+        border-color: #4F46E5;
+        color: #4F46E5;
+    }
+    
+    .action-buttons .btn-outline-primary:hover {
+        background-color: #4F46E5;
+        border-color: #4F46E5;
+        color: white;
+    }
+    
+    .action-buttons .btn-outline-danger {
+        border-color: #DC2626;
+        color: #DC2626;
+    }
+    
+    .action-buttons .btn-outline-danger:hover {
+        background-color: #DC2626;
+        border-color: #DC2626;
+        color: white;
+    }
+    
+    /* Additional utility classes */
+    .text-success {
+        color: #059669 !important;
+    }
+    
+    .text-danger {
+        color: #DC2626 !important;
+    }
+    
+    .text-warning {
+        color: #D97706 !important;
+    }
+
+    /* Mobile responsive styles for budgets */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.8rem !important;
+        }
+        
+        .month-navigation {
+            margin-bottom: 2rem;
+        }
+        
+        .month-navigation .h4 {
+            font-size: 1.2rem;
+        }
+        
+        .budget-card {
+            margin-bottom: 1rem;
+        }
+        
+        .budget-card .card-body {
+            padding: 1rem;
+        }
+        
+        .budget-card h5 {
+            font-size: 1rem;
+        }
+        
+        .budget-card .fs-4 {
+            font-size: 1.25rem !important;
+        }
+        
+        .budget-categories-title {
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        
+        .budget-item {
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+        }
+        
+        .action-buttons .btn {
+            width: 28px;
+            height: 28px;
+            font-size: 0.75rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .page-title {
+            font-size: 1.5rem !important;
+        }
+        
+        .month-navigation .h4 {
+            font-size: 1.1rem;
+        }
+        
+        .budget-card .card-body {
+            padding: 0.75rem;
+        }
+        
+        .budget-card h5 {
+            font-size: 0.9rem;
+        }
+        
+        .budget-card .fs-4 {
+            font-size: 1.1rem !important;
+        }
+        
+        .budget-categories-title {
+            font-size: 1.1rem;
+        }
+        
+        .budget-item {
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-card {
+            padding: 0.75rem;
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+        }
+        
+        .action-buttons .btn {
+            width: 26px;
+            height: 26px;
+            font-size: 0.7rem;
+        }
+    }
+</style>
+
 <div class="row mb-4 align-items-center">
-    <div class="col-md-12">
+    <div class="col-12">
         <h1 class="page-title text-center" style="font-weight: 800; font-size: 2.5rem; color: #4F46E5; margin-bottom: 0;">Budget Management</h1>
     </div>
 </div>
@@ -35,19 +254,18 @@
 </div>
 
 <div class="row justify-content-center text-center mb-4 g-4">
-    <div class="col-md-4 col-lg-4">
-        <div class="card h-50">
+    <div class="col-12 col-md-4 col-lg-4">
+        <div class="card h-50 budget-card">
             <div class="card-body">
                 <h5 class="card-title">Total Budget <a href="#" data-bs-toggle="modal" data-bs-target="#editMonthlyBudgetModal"><i class="fas fa-edit"></i></a></h5>
                 <p class="card-text fs-4">Rs <%= formatNepaleseCurrency(totalBudget) %></p>
             </div>
         </div>
     </div>
-
 </div>
 
-<div class="d-flex justify-content-center align-items-center mb-4">
-    <h3 class="mb-0">Budgeted categories: <%= currentMonthName %>, <%= currentYear %></h3>
+<div class="d-flex justify-content-center align-items-center mb-4 flex-wrap">
+    <h3 class="mb-0 budget-categories-title">Budgeted categories: <%= currentMonthName %>, <%= currentYear %></h3>
     <% if (budgets.length > 0) { %>
     <div class="dropdown ms-2">
         <button class="btn btn-sm btn-icon" type="button" id="removeAllDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: transparent;">
@@ -60,150 +278,152 @@
     <% } %>
 </div>
 
-<div class="row justify-content-center">
+<div class="row justify-content-center accordion" id="budgetAccordion">
     <% if (budgets.length > 0) { %>
-        <% budgets.forEach(budget => { %>
-            <% 
-                const spent = budget.transactions.reduce((total, t) => total + t.amount, 0);
-                const remaining = budget.amount - spent;
-                const percentageSpent = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+            <% budgets.forEach(budget => { %>
+                <% 
+                    const spent = budget.transactions.reduce((total, t) => total + t.amount, 0);
+                    const remaining = budget.amount - spent;
+                    const percentageSpent = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
 
-                let progressColor = 'bg-success';
-                if (percentageSpent > 75 && percentageSpent <= 100) {
-                    progressColor = 'bg-warning';
-                } else if (percentageSpent > 100) {
-                    progressColor = 'bg-danger';
-                }
+                    let progressColor = 'bg-success';
+                    if (percentageSpent > 75 && percentageSpent <= 100) {
+                        progressColor = 'bg-warning';
+                    } else if (percentageSpent > 100) {
+                        progressColor = 'bg-danger';
+                    }
 
-                const categoryIcons = {
-                    'Food': 'fas fa-utensils',
-                    'Transportation': 'fas fa-car',
-                    'Utilities': 'fas fa-bolt',
-                    'Housing': 'fas fa-home',
-                    'Entertainment': 'fas fa-film',
-                    'Health': 'fas fa-heartbeat',
-                    'Shopping': 'fas fa-shopping-bag',
-                    'Education': 'fas fa-user-graduate',
-                    'Travel': 'fas fa-plane',
-                    'Personal Care': 'fas fa-spa',
-                    'Miscellaneous': 'fas fa-receipt',
-                    'Groceries': 'fas fa-shopping-cart',
-                    'Subscriptions': 'fas fa-rss-square',
-                    'Gifts': 'fas fa-gift',
-                    'Insurance': 'fas fa-shield-alt',
-                    'Rent': 'fas fa-home',
-                    'Fuel': 'fas fa-gas-pump',
-                    'Public Transit': 'fas fa-bus',
-                    'Other Expense': 'fas fa-tag'
-                };
-                const icon = categoryIcons[budget.category] || 'fas fa-dollar-sign';
+                    const categoryIcons = {
+                        'Food': 'fas fa-utensils',
+                        'Transportation': 'fas fa-car',
+                        'Utilities': 'fas fa-bolt',
+                        'Housing': 'fas fa-home',
+                        'Entertainment': 'fas fa-film',
+                        'Health': 'fas fa-heartbeat',
+                        'Shopping': 'fas fa-shopping-bag',
+                        'Education': 'fas fa-user-graduate',
+                        'Travel': 'fas fa-plane',
+                        'Personal Care': 'fas fa-spa',
+                        'Miscellaneous': 'fas fa-receipt',
+                        'Groceries': 'fas fa-shopping-cart',
+                        'Subscriptions': 'fas fa-rss-square',
+                        'Gifts': 'fas fa-gift',
+                        'Insurance': 'fas fa-shield-alt',
+                        'Rent': 'fas fa-home',
+                        'Fuel': 'fas fa-gas-pump',
+                        'Public Transit': 'fas fa-bus',
+                        'Other Expense': 'fas fa-tag'
+                    };
+                    const icon = categoryIcons[budget.category] || 'fas fa-dollar-sign';
 
-                const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-                const recommendation = smartRecommendations.find(r => r.category && budget.category && r.category.toLowerCase() === budget.category.toLowerCase()) || { message: 'No specific recommendation available.', type: 'info', icon: 'fas fa-info-circle' };
+                    const recommendation = smartRecommendations.find(r => r.category && budget.category && r.category.toLowerCase() === budget.category.toLowerCase()) || { message: 'No specific recommendation available.', type: 'info', icon: 'fas fa-info-circle' };
 
-                const recommendationTypeMap = {
-                    'info': 'alert-info',
-                    'warning': 'alert-warning',
-                    'success': 'alert-success',
-                    'danger': 'alert-danger'
-                };
-                const recommendationClass = recommendationTypeMap[recommendation.type] || 'alert-secondary';
-            %>
+                    const recommendationTypeMap = {
+                        'info': 'alert-info',
+                        'warning': 'alert-warning',
+                        'success': 'alert-success',
+                        'danger': 'alert-danger'
+                    };
+                    const recommendationClass = recommendationTypeMap[recommendation.type] || 'alert-secondary';
+                %>
 
-            <div class="col-md-6 col-lg-5 mb-4 d-flex align-items-stretch">
-                <div class="card w-100" style="border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-                    <!-- Card Header -->
-                    <div class="card-header d-flex justify-content-between align-items-center bg-light" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
-                        <div class="d-flex align-items-center">
-                            <i class="<%= icon %> me-2"></i>
-                            <div>
-                                <span class="fw-bold fs-5"><%= budget.category %></span>
-                                <span class="text-muted ms-1" style="font-weight: 500; font-size: 0.9rem;">(<%= months[budget.month - 1] %> <%= budget.year %>)</span>
+                <div class="col-12 col-md-6 col-lg-5 col-xl-4 mb-4">
+                    <div class="stat-card w-100">
+                        <!-- Card Header with Action Buttons -->
+                        <div class="stat-header">
+                            <div class="stat-title"><%= budget.category %></div>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeLimitModal-<%= budget._id %>" title="Edit Budget">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/budgets/<%= budget._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this budget?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Budget">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-icon" type="button" id="dropdownMenuButton-<%= budget._id %>" data-bs-toggle="dropdown" aria-expanded="false" style="border: none; background: transparent;">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-<%= budget._id %>">
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changeLimitModal-<%= budget._id %>">Change limit</a></li>
-                                <li>
-                                    <form action="/budgets/<%= budget._id %>?_method=DELETE" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to remove this budget?');">
-                                        <button type="submit" class="dropdown-item">Remove budget</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Card Body -->
-                    <div class="card-body">
-                        <div class="mb-3 px-2">
+                        
+                        <!-- Card Content -->
+                        <div class="stat-value">Rs <%= formatNepaleseCurrency(budget.amount) %></div>
+                        <div class="stat-change">
                             <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-bold">Limit:</span>
-                                <span>Rs <%= formatNepaleseCurrency(budget.amount) %></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-bold">Spent:</span>
+                                <span>Spent:</span>
                                 <span>Rs <%= formatNepaleseCurrency(spent) %></span>
                             </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold">Remaining:</span>
-                                <span class="text-<%= remaining < 0 ? 'danger' : 'success' %>">Rs <%= formatNepaleseCurrency(Math.max(0, remaining)) %></span>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Remaining:</span>
+                                <span class="<%= remaining < 0 ? 'text-danger' : 'text-success' %>">Rs <%= formatNepaleseCurrency(Math.max(0, remaining)) %></span>
+                            </div>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar <%= progressColor %>" role="progressbar" style="width: <%= Math.min(percentageSpent, 100) %>%" aria-valuenow="<%= percentageSpent %>" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
-                        <!-- Progress Bar -->
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar <%= progressColor %>" role="progressbar" style="width: <%= Math.min(percentageSpent, 100) %>%" aria-valuenow="<%= percentageSpent %>" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
 
-                    <!-- Card Footer with Collapsible Recommendation -->
-                    <div class="card-footer bg-white" style="border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
-                        <a class="text-decoration-none text-dark d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse-<%= budget._id %>" role="button" aria-expanded="false" aria-controls="collapse-<%= budget._id %>">
-                            <span>Insight</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </a>
-                        <div class="collapse mt-2" id="collapse-<%= budget._id %>">
-                            <div class="alert <%= recommendationClass %> d-flex align-items-center mb-0" role="alert">
-                                <i class="fas <%= recommendation.icon %> me-2"></i>
-                                <div><%= recommendation.message %></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Change Limit Modal -->
-            <div class="modal fade" id="changeLimitModal-<%= budget._id %>" tabindex="-1" aria-labelledby="changeLimitModalLabel-<%= budget._id %>" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="changeLimitModalLabel-<%= budget._id %>">Change Budget Limit for <%= budget.category %></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form action="/budgets/<%= budget._id %>?_method=PUT" method="POST">
-                            <div class="modal-body">
-                                <div class="mb-3">
-                                    <label for="amount-<%= budget._id %>" class="form-label">New Limit (Rs)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">Rs</span>
-                                        <input type="number" class="form-control change-limit-amount" name="amount" value="<%= Math.round(budget.amount) %>" step="1" required data-budget-id="<%= budget._id %>">
+                        <!-- Card Footer with Collapsible Recommendation -->
+                        <div class="card-footer bg-transparent border-0 p-0 mt-3">
+                            <a class="text-decoration-none text-dark d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse-<%= budget._id %>" role="button" aria-expanded="false" aria-controls="collapse-<%= budget._id %>">
+                                <span><i class="fas fa-lightbulb me-1"></i>  Insight</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </a>
+                            <div class="collapse mt-2" id="collapse-<%= budget._id %>" data-bs-parent="#budgetAccordion">
+                                <div class="alert <%= recommendationClass %> mb-0" role="alert">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas <%= recommendation.icon || 'fa-info-circle' %> me-2 mt-1"></i>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold mb-1"><%= recommendation.recommendation || recommendation.message %></div>
+                                            
+                                            <% if (recommendation.actionableAdvice && recommendation.actionableAdvice.length > 0) { %>
+                                                <div class="mt-2">
+                                                    <small class="text-muted fw-bold">Action Items:</small>
+                                                    <ul class="list-unstyled mt-1 mb-0">
+                                                        <% recommendation.actionableAdvice.slice(0, 3).forEach(function(advice) { %>
+                                                            <li class="small">
+                                                                <i class="fas fa-arrow-right me-1 text-primary"></i>
+                                                                <%= advice %>
+                                                            </li>
+                                                        <% }); %>
+                                                    </ul>
+                                                </div>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary save-changes-btn" data-budget-id="<%= budget._id %>">Save Changes</button>
-                                <div class="form-text text-danger mt-2 change-limit-warning" data-budget-id="<%= budget._id %>" style="display: none;"></div>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        <% }); %>
-    </div>
+
+                <!-- Change Limit Modal -->
+                <div class="modal fade" id="changeLimitModal-<%= budget._id %>" tabindex="-1" aria-labelledby="changeLimitModalLabel-<%= budget._id %>" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="changeLimitModalLabel-<%= budget._id %>">Change Budget Limit for <%= budget.category %></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="/budgets/<%= budget._id %>?_method=PUT" method="POST">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="amount-<%= budget._id %>" class="form-label">New Limit (Rs)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rs</span>
+                                            <input type="number" class="form-control change-limit-amount" name="amount" value="<%= Math.round(budget.amount) %>" step="1" required data-budget-id="<%= budget._id %>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary save-changes-btn" data-budget-id="<%= budget._id %>">Save Changes</button>
+                                    <div class="form-text text-danger mt-2 change-limit-warning" data-budget-id="<%= budget._id %>" style="display: none;"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
     <% } else { %>
     <div class="col-md-8 text-center">
         <div class="card p-4" style="border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-align: center;">

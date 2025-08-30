@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Personal Finance Tracker</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,10 +15,10 @@
 </head>
 <body>
     <!-- Sidebar Navigation -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-logo" style="padding: 1.5rem 0; text-align: center; margin-bottom: 0.5rem;">
             <i class="fas fa-wallet text-primary"></i>
-            <span>BSU Tracker</span>
+            <span class="sidebar-logo-text">Tracker</span>
         </div>
         
         <ul class="sidebar-menu">
@@ -30,16 +30,16 @@
             </li>
 
             <li class="sidebar-menu-item">
-                <a href="/budgets" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/budgets' ? 'active' : '' %>">
-                    <i class="fas fa-chart-pie sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Budgets</span>
+                <a href="/transactions" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/transactions' ? 'active' : '' %>">
+                    <i class="fas fa-exchange-alt sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Transactions</span>
                 </a>
             </li>
 
             <li class="sidebar-menu-item">
-                <a href="/transactions" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/transactions' ? 'active' : '' %>">
-                    <i class="fas fa-exchange-alt sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">Transactions</span>
+                <a href="/budgets" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/budgets' ? 'active' : '' %>">
+                    <i class="fas fa-chart-pie sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Budgets</span>
                 </a>
             </li>
             
@@ -50,7 +50,6 @@
                 </a>
             </li>
             <% if(typeof user != 'undefined') { %>
-
             <% } else { %>
             <li class="sidebar-menu-item">
                 <a href="/users/login" class="sidebar-menu-link <%= typeof path !== 'undefined' && path === '/users/login' ? 'active' : '' %>">
@@ -69,7 +68,7 @@
     </div>
     
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content" id="main-content">
         <%- include('partials/messages') %>
         <%- body %>
     </div>
@@ -97,8 +96,7 @@
       if (num % 1 !== 0) {
         numStr = num.toFixed(2);
       } else {
-        // Ensure it's a string for the split operation, even if it's an integer
-        numStr = String(num);
+        numStr = num.toString();
       }
 
       const [integerPart, decimalPart] = numStr.split('.');
@@ -112,13 +110,35 @@
       formattedInteger += lastThree;
 
       // Only add decimal part if it exists and is not "00"
-      // Also handle cases where decimalPart might be undefined (for integers)
       if (decimalPart && decimalPart !== "00") {
-        return `Rs${formattedInteger}.${decimalPart}`;
+        return `${formattedInteger}.${decimalPart}`;
       } else {
-        return `Rs${formattedInteger}`;
+        return formattedInteger;
       }
     }
+
+    // Mobile responsive sidebar toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        
+        // Check if we're on mobile
+        function checkMobile() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('mobile-sidebar');
+                mainContent.classList.add('mobile-main');
+            } else {
+                sidebar.classList.remove('mobile-sidebar');
+                mainContent.classList.remove('mobile-main');
+            }
+        }
+        
+        // Initial check
+        checkMobile();
+        
+        // Check on resize
+        window.addEventListener('resize', checkMobile);
+    });
     </script>
 </body>
 </html>

@@ -1,77 +1,136 @@
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="mb-0" style="font-weight: 800; font-size: 2.5rem; color: #5b53f7;">Add New Transaction</h1>
-            <a href="/transactions" class="btn btn-outline-secondary" style="border-radius: 10px;">
-                <i class="fas fa-arrow-left me-2"></i> Back to Transactions
+        <style>
+            /* Page header */
+            .add-transaction-header {
+                background: linear-gradient(135deg, #5b53f7, #3a56d4);
+                border-radius: 16px;
+                color: #fff;
+                padding: 22px 24px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 8px 24px rgba(67, 97, 238, 0.25);
+            }
+            .add-transaction-header h1 {
+                font-weight: 800;
+                font-size: 2rem;
+                margin: 0;
+            }
+            .add-transaction-card {
+                border-radius: 16px;
+                overflow: hidden;
+                border: 1px solid #e9ecef;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+                background: #fff;
+            }
+            /* Toggle group */
+            .pill-toggle {
+                background-color: #f1f5f9;
+                border-radius: 12px;
+                padding: 6px;
+                gap: 6px;
+            }
+            .pill-toggle .type-label {
+                display: block;
+                cursor: pointer;
+                padding: 10px 12px;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+                font-weight: 600;
+            }
+            /* Large input aesthetics */
+            .soft-input-group.input-group-lg .input-group-text {
+                background-color: #f8fafc;
+                border-right: none;
+            }
+            .soft-input-group.input-group-lg .form-control {
+                border-left: none;
+                font-size: 1.5rem;
+                height: 60px;
+                font-weight: 700;
+            }
+            .soft-input-group .form-control:focus {
+                box-shadow: 0 0 0 4px rgba(91, 83, 247, 0.15);
+            }
+            /* Remove number spinners specifically for amount */
+            #amount { -moz-appearance: textfield; appearance: textfield; }
+            #amount::-webkit-outer-spin-button,
+            #amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+            /* Helper text */
+            .helper-text { color: #6b7280; }
+            /* Recurring section */
+            .recurring-section { background-color: #f8f9fa; border-radius: 12px; }
+            /* Submit button */
+            .submit-btn { font-weight: 700; font-size: 1.05rem; border-radius: 12px; }
+            @media (max-width: 576px) {
+                .add-transaction-header h1 { font-size: 1.5rem; }
+            }
+        </style>
+
+        <div class="add-transaction-header mb-4">
+            <h1 class="mb-0">Add New Transaction</h1>
+            <a href="/transactions" class="btn btn-light btn-sm" style="border-radius: 10px;">
+                <i class="fas fa-arrow-left me-2"></i> Back
             </a>
         </div>
-        <div class="budget-card" style="border-radius: 16px; overflow: hidden;">
-            
+
+        <div class="add-transaction-card">
             <div class="p-4">
                 <form action="/transactions" method="POST" id="transactionForm">
                     <!-- Transaction Type with Toggle -->
                     <div class="mb-4">
                         <label class="form-label fw-medium mb-2">Transaction Type</label>
-                        <div class="d-flex" style="background-color: #f1f5f9; border-radius: 10px; padding: 4px;">
-                            
-                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
+                        <div class="d-flex pill-toggle align-items-stretch">
+                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-1" style="margin-right: 0;">
                                 <input class="form-check-input" type="radio" name="type" id="typeIncome" value="income" checked style="display: none;" onchange="updateCategoryOptions()">
-                                <label class="form-check-label type-label" for="typeIncome" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
+                                <label class="form-check-label type-label" for="typeIncome">
                                     <i class="fas fa-arrow-up text-success me-2"></i> Income
                                 </label>
                             </div>
-
-                            
-                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-2" style="margin-right: 0;">
+                            <div class="form-check form-check-inline flex-grow-1 mb-0 text-center py-1" style="margin-right: 0;">
                                 <input class="form-check-input" type="radio" name="type" id="typeExpense" value="expense" style="display: none;" onchange="updateCategoryOptions()">
-                                <label class="form-check-label type-label" for="typeExpense" style="display: block; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.2s;">
+                                <label class="form-check-label type-label" for="typeExpense">
                                     <i class="fas fa-arrow-down text-danger me-2"></i> Expense
                                 </label>
                             </div>
-                            
-                            
-                            
                         </div>
                     </div>
-                    
-                    <!-- Amount with Large Input -->
-                    <div class="mb-4">
-                        <label for="amount" class="form-label fw-medium mb-2">Amount</label>
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text" style="background-color: #f8fafc; border-right: none;">Rs</span>
-                            <input type="number" class="form-control" id="amount" name="amount" step="1" required 
-                                style="border-left: none; font-size: 1.5rem; height: 60px; font-weight: 600;" >
+
+                    <!-- Amount and Category side by side on md+ -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="amount" class="form-label fw-medium mb-2">Amount</label>
+                            <div class="input-group input-group-lg soft-input-group">
+                                <span class="input-group-text">Rs</span>
+                                <input type="number" class="form-control" id="amount" name="amount" step="1" required>
+                            </div>
+                            <small class="helper-text">Enter whole amount. You can add decimals if needed.</small>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="category" class="form-label fw-medium mb-2">Category</label>
+                            <select class="form-select form-select-lg" id="category" name="category" style="height: 60px;">
+                                <!-- Categories will be dynamically populated by JavaScript -->
+                            </select>
                         </div>
                     </div>
-                    
-                    <!-- Category with Icons -->
-                    <div class="mb-4">
-                        <label for="category" class="form-label fw-medium mb-2">Category</label>
-                                                <select class="form-select form-select-lg" id="category" name="category" style="height: 60px;">
-                            <!-- Categories will be dynamically populated by JavaScript -->
-                        </select>
-                    </div>
-                    
+
                     <div class="row">
                         <!-- Description -->
                         <div class="col-md-7 mb-4">
                             <label for="description" class="form-label fw-medium mb-2">Description (Optional)</label>
-                            <input type="text" class="form-control form-control-lg" id="description" name="description" 
-                                placeholder="What's this for?" oninput="suggestCategory('description', 'category', 'categorySuggestion')">
+                            <input type="text" class="form-control form-control-lg" id="description" name="description" placeholder="What's this for?" oninput="suggestCategory('description', 'category', 'categorySuggestion')">
                             <small id="categorySuggestion" class="form-text text-muted mt-1"></small>
                         </div>
-                        
                         <!-- Date -->
                         <div class="col-md-5 mb-4">
                             <label for="date" class="form-label fw-medium mb-2">Date</label>
-                            <input type="date" class="form-control form-control-lg" id="date" name="date" 
-                                value="<%= new Date().toISOString().split('T')[0] %>" required>
+                            <input type="date" class="form-control form-control-lg" id="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>" required>
                         </div>
                     </div>
-                    
+
                     <!-- Recurring Transaction Section -->
-                    <div class="mb-4 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+                    <div class="mb-4 p-3 recurring-section">
                         <div class="form-check form-switch d-flex justify-content-between align-items-center">
                             <div>
                                 <label class="form-check-label fw-medium" for="isRecurring">Recurring Transaction</label>
@@ -90,12 +149,12 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-3" style="font-weight: 600; font-size: 1.1rem; border-radius: 12px;">
+                    <button type="submit" class="btn btn-primary w-100 py-3 submit-btn">
                         <i class="fas fa-plus-circle me-2"></i> Add Transaction
                     </button>
                 </form>
 
-<script>
+                <script>
     document.addEventListener('DOMContentLoaded', function() {
         const recurringToggle = document.getElementById('isRecurring');
         const intervalContainer = document.getElementById('recurringIntervalContainer');
@@ -108,7 +167,7 @@
             }
         });
     });
-</script>
+                </script>
             </div>
         </div>
     </div>

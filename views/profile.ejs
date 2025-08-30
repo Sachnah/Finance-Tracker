@@ -1,78 +1,376 @@
 <style>
     .profile-container {
-        max-width: 500px;
-        margin: 2rem auto;
-        background: #fff;
-        padding: 2.5rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #E5E7EB;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
     }
+    
     .profile-header {
-        text-align: center;
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #E5E7EB;
+        margin-bottom: 2rem;
+    }
+    
+    
+    
+    .profile-name {
         font-size: 1.75rem;
         font-weight: 700;
+        color: #111827;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-email {
+        color: #6B7280;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-meta {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        text-align: center;
+    }
+    
+    .meta-label {
+        font-size: 0.875rem;
+        color: #6B7280;
+        margin-bottom: 0.25rem;
+    }
+    
+    .meta-value {
+        font-weight: 600;
+        color: #111827;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
         margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 1px solid #E5E7EB;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-title {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
         color: #111827;
-    }
-    .profile-header i {
-        margin-right: 0.75rem;
-    }
-    .profile-info .form-label {
-        font-weight: 500;
         margin-bottom: 0.5rem;
-        color: #374151;
-        font-size: 0.9rem;
     }
-    .profile-info .form-control[readonly] {
-        background-color: #F3F4F6;
+    
+    .stat-change {
+        font-size: 0.875rem;
+        color: #6B7280;
+    }
+    
+    .stat-change.positive {
+        color: #059669;
+    }
+    
+    .stat-change.negative {
+        color: #DC2626;
+    }
+    
+    .info-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         border: 1px solid #E5E7EB;
-        padding: 0.8rem 1rem;
-        font-size: 1rem;
-        color: #111827;
-        border-radius: 8px;
+        margin-bottom: 1.5rem;
     }
-    .profile-buttons .btn {
-        width: 100%;
-        padding: 0.8rem;
-        font-size: 1rem;
+    
+    .section-title {
+        font-size: 1.25rem;
         font-weight: 600;
+        color: #111827;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .info-item {
+        padding: 1rem;
+        background: #F9FAFB;
         border-radius: 8px;
+        border: 1px solid #E5E7EB;
+    }
+    
+    .info-label {
+        font-size: 0.875rem;
+        color: #6B7280;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        color: #111827;
+    }
+    
+    .category-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .category-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    
+    .category-item:last-child {
+        border-bottom: none;
+    }
+    
+    .category-name {
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    .category-count {
+        background: #4F46E5;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-profile {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
         border: none;
+        cursor: pointer;
     }
-    .profile-buttons .btn-dashboard {
-        background-color: #4F46E5;
-        color: #fff;
+    
+    .btn-primary {
+        background: #4F46E5;
+        color: white;
     }
-    .profile-buttons .btn-logout {
-        background-color: #EF4444;
-        color: #fff;
+    
+    .btn-primary:hover {
+        background: #4338CA;
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+        background: #F3F4F6;
+        color: #374151;
+        border: 1px solid #D1D5DB;
+    }
+    
+    .btn-secondary:hover {
+        background: #E5E7EB;
+        color: #374151;
+        transform: translateY(-1px);
+    }
+    
+    .btn-danger {
+        background: #DC2626;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #B91C1C;
+        color: white;
+        transform: translateY(-1px);
+    }
+    
+    /* Additional utility classes */
+    .text-success {
+        color: #059669 !important;
+    }
+    
+    .text-danger {
+        color: #DC2626 !important;
+    }
+    
+    .text-warning {
+        color: #D97706 !important;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .profile-meta {
+            gap: 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .btn-profile {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 
 <div class="profile-container">
-    <h1 class="profile-header">
-        <i class="fas fa-user-circle"></i> Profile
-    </h1>
-    <div class="profile-info">
-        <div class="mb-3">
-            <label class="form-label">Name</label>
-            <input type="text" class="form-control" value="<%= user.name %>" readonly>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-control" value="<%= user.email %>" readonly>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Account Created</label>
-            <input type="text" class="form-control" value="<%= new Date(user.date).toLocaleDateString() %>" readonly>
+    <!-- Profile Header -->
+    <div class="profile-header">
+        
+        <h1 class="profile-name"><%= user.name %></h1>
+        <p class="profile-email"><%= user.email %></p>
+        <div class="profile-meta">
+            <div class="meta-item">
+                <div class="meta-label">Account Created</div>
+                <div class="meta-value"><%= new Date(user.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Member Since</div>
+                <div class="meta-value"><%= stats.accountAge %> days</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Email Status</div>
+                <div class="meta-value">
+                    <% if (user.isVerified) { %>
+                        <span class="badge bg-success">Verified</span>
+                    <% } else { %>
+                        <span class="badge bg-warning">Pending</span>
+                    <% } %>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="d-grid gap-2 mt-4 profile-buttons">
-        <a href="/dashboard" class="btn btn-dashboard">Back to Dashboard</a>
-        <a href="/users/logout" class="btn btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">Total Transactions</div>
+                <div class="stat-icon" style="background: #4F46E5;">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+            </div>
+            <div class="stat-value"><%= stats.totalTransactions.toLocaleString() %></div>
+            <div class="stat-change">All time transactions</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">Total Income Logged</div>
+                <div class="stat-icon" style="background: #059669;">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+            <div class="stat-value">Rs <%= formatNepaliCurrency(stats.totalIncome) %></div>
+            <div class="stat-change positive">+Rs <%= formatNepaliCurrency(stats.currentMonthIncome) %> this month</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">Total Expenses Logged</div>
+                <div class="stat-icon" style="background: #DC2626;">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            </div>
+            <div class="stat-value">Rs <%= formatNepaliCurrency(stats.totalExpense) %></div>
+            <div class="stat-change negative">-Rs <%= formatNepaliCurrency(stats.currentMonthExpense) %> this month</div>
+        </div>
+    </div>
+
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="/dashboard" class="btn-profile btn-primary">
+            <i class="fas fa-tachometer-alt"></i>
+            Back to Dashboard
+        </a>
+        <a href="/transactions" class="btn-profile btn-secondary">
+            <i class="fas fa-list"></i>
+            View Transactions
+        </a>
+        <a href="/budgets" class="btn-profile btn-secondary">
+            <i class="fas fa-bullseye"></i>
+            Manage Budgets
+        </a>
+        <a href="/users/logout" class="btn-profile btn-danger" onclick="return confirm('Are you sure you want to logout?')">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+        </a>
     </div>
 </div>
